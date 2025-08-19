@@ -1,12 +1,12 @@
 'use client';
 
 import clsx from 'clsx';
-import { Upload } from 'lucide-react';
 import Image from 'next/image';
 import React, { forwardRef, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
 import { Button } from './Button';
+import { UploadIcon } from './Icons';
 
 type UploadFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
@@ -123,14 +123,13 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
 
               {/* Overlay with blur + upload icon */}
               <div className='absolute inset-0 flex items-center justify-center bg-black/30'>
-                <Upload className='h-10 w-10 text-white opacity-90' />
+                <UploadIcon fill='black' bgFill='white' />
               </div>
             </>
           ) : (
             // UI when no file is selected
             <div className='pointer-events-none flex w-full flex-col items-center gap-3'>
-              <Upload className='h-10 w-10 text-gray-400' />
-
+              <UploadIcon bgFill='#EDEDED' />
               <p className='font-ccep-wide text-sm font-light'>Click to upload or drag and drop</p>
               <p className='font-ccep-wide text-sm font-light'>{maxSizeText}</p>
 

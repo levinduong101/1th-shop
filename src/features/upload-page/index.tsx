@@ -16,6 +16,7 @@ export default function UploadView() {
           height={121}
           alt='DÜSSEL DORF KOCHT AUF'
           className='w-[192px] md:w-52 lg:w-[278px]'
+          priority
         />
       </Container>
 
@@ -30,6 +31,7 @@ export default function UploadView() {
             'absolute top-0 left-1/2 w-[356px] -translate-x-[43.5%] -translate-y-[40%]',
             '3xl:w-[705px] md:w-[375px] md:-translate-x-[10%] lg:w-[500px] lg:-translate-y-[43%]',
           )}
+          priority
         />
       </div>
 
@@ -43,7 +45,7 @@ export default function UploadView() {
             alt='Arrow right'
             className='h-auto w-24'
           />
-          <h2 className='font-ccep-wide 3xl:text-[50px] text-[35px] leading-[1.2] font-bold lg:text-[40px]'>
+          <h2 className='font-ccep-wide 3xl:text-[50px] text-brown text-[35px] leading-[1.2] font-bold lg:text-[40px]'>
             Submit Your
             <br />
             Team Video

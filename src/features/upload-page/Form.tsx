@@ -30,9 +30,9 @@ export default function Form() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='grid gap-15 md:grid-cols-2'>
+    <form onSubmit={handleSubmit(onSubmit)} className='text-brown grid gap-15 md:grid-cols-2'>
       <div className='flex flex-col gap-4 md:gap-7.5'>
-        <p className='font-ccep-wide mb-4 text-lg font-light'>
+        <p className='font-ccep-wide mb-4 text-lg leading-[1] font-light lg:mb-6.5 lg:text-2xl'>
           Show us what makes your team special for a chance to win an exclusive Coca-Cola sponsored
           team event! This is your opportunity to share your team&apos;s passion, creativity, and
           energy with us.
@@ -56,7 +56,7 @@ export default function Form() {
         <Textarea
           label='Tell us about your team'
           placeholder='A short description of your team'
-          rows={7}
+          rows={6}
           {...register('description', { required: true })}
         />
 

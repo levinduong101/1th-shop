@@ -9,7 +9,7 @@ import { XIcon } from '@/src/components/ui/Icons';
 
 export default function HomeView() {
   return (
-    <section className='grid min-h-screen w-full lg:grid-cols-[1fr_max-content_1fr]'>
+    <section className='grid min-h-screen w-full overflow-y-hidden lg:grid-cols-[1fr_max-content_1fr]'>
       {/* Image Left */}
       <div className='relative hidden w-full lg:block'>
         <Image
@@ -64,7 +64,7 @@ export default function HomeView() {
               height={154}
               alt='Chefs Left Image'
               className={clsx(
-                'absolute bottom-0 -left-9 aspect-[125/154] w-[125px] translate-y-1/2',
+                'absolute bottom-0 -left-9 aspect-[125/154] w-[125px] translate-y-[45%]',
                 'lg:-left-15 lg:w-37.5 lg:translate-y-1/3',
                 '3xl:w-[194px] 3xl:-left-36 3xl:translate-y-1/4',
               )}
@@ -89,14 +89,16 @@ export default function HomeView() {
 
           <Container className='mt-8 flex flex-col items-center gap-3.5 lg:mt-18 lg:gap-6'>
             <div className='max-w-[700px] text-center text-white'>
-              <h1 className='text-3xl font-bold lg:text-6xl'>Let&#39;s Get Started!</h1>
-              <p className='font-ccep-wide mt-3 text-sm lg:text-base'>
+              <h1 className='font-ccep-narrow text-5xl font-bold lg:text-6xl'>
+                Let&#39;s Get Started!
+              </h1>
+              <p className='font-ccep-wide mt-3 text-sm font-normal lg:text-base'>
                 Welcome. This is your personal entry to the Coca-Cola × Metro Chefs in Town
                 campaign. Please choose an option below to begin.
               </p>
             </div>
 
-            <div className='relative mb-[100px] flex w-full max-w-[560px] flex-col gap-3 lg:mb-[150px]'>
+            <div className='relative mb-[100px] flex w-full max-w-[560px] flex-col gap-3'>
               <Button fullWidth variant='white' href='/design-product' arrowAnimation>
                 DESIGN YOUR TEAM HOODIE
               </Button>

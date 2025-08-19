@@ -12,7 +12,7 @@ export default function Footer() {
         alt='Coca Cola Logo'
         className='md:w-[169px]'
       />
-      <XIcon className='md:hidden p-0.5' width={16} height={16} />
+      <XIcon className='p-0.5 md:hidden' width={16} height={16} />
 
       <Image
         src='/images/metro_logo.svg'
@@ -21,7 +21,7 @@ export default function Footer() {
         alt='Metro Logo'
         className='md:w-[124px]'
       />
-      <XIcon className='md:hidden p-0.5' width={16} height={16} />
+      <XIcon className='p-0.5 md:hidden' width={16} height={16} />
 
       <Image
         src='/images/chefs_logo.svg'
