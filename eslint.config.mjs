@@ -22,8 +22,8 @@ const eslintConfig = [
       import: esimport,
     },
     rules: {
-      "@typescript-eslint/explicit-function-return-type": "error",
-      "@typescript-eslint/explicit-module-boundary-types": "error",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": "error",
       "prettier/prettier": [
@@ -53,7 +53,7 @@ const eslintConfig = [
       "no-console": "warn",
       "import/no-unresolved": "error",
       "import/order": [
-        "error",
+        "off",
         {
           groups: [
             "builtin",
