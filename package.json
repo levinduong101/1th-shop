@@ -14,10 +14,14 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "classnames": "^2.5.1",
+    "clsx": "^2.1.1",
+    "gsap": "^3.13.0",
+    "lucide-react": "^0.540.0",
     "next": "15.2.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-dropzone": "^14.3.8",
+    "react-hook-form": "^7.62.0",
     "tailwind-merge": "^3.0.2"
   },
   "devDependencies": {
