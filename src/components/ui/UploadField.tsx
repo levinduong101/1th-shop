@@ -15,6 +15,10 @@ type UploadFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   maxSize?: number;
   maxSizeText?: string;
   accept?: 'video' | 'image';
+  onlyButton?: boolean;
+  buttonClassName?: string;
+  buttonVariant?: 'black' | 'red' | 'white' | 'brown';
+  buttonContent?: React.ReactNode | string;
 };
 
 const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
@@ -28,6 +32,10 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
       maxSize = 200 * 1024 * 1024, // 200MB
       maxSizeText = 'MP4 or MOV — max file size 200 MB',
       multiple = false,
+      onlyButton = false,
+      buttonClassName = '',
+      buttonVariant = 'black',
+      buttonContent = 'BROWSE FILES',
       ...props
     },
     ref,
@@ -67,15 +75,6 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
       };
     }, [preview]);
 
-    // Function to format file size
-    // const formatFileSize = (bytes: number) => {
-    //   if (bytes === 0) return '0 Bytes';
-    //   const k = 1024;
-    //   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    //   const i = Math.floor(Math.log(bytes) / Math.log(k));
-    //   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    // };
-
     function isVideo(fileType: string) {
       return fileType.startsWith('video/');
     }
@@ -91,9 +90,12 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
         <div
           {...getRootProps()}
           className={clsx(
-            'relative flex h-100 w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 bg-white p-6 transition hover:bg-gray-50',
+            'relative flex w-full cursor-pointer items-center justify-center border-gray-300 bg-white transition hover:bg-gray-50',
             isDragActive && 'border-blue-500 bg-blue-50',
             error && 'border-red-500',
+            onlyButton && !preview
+              ? ''
+              : 'h-100 overflow-hidden rounded-2xl border-2 border-dashed p-6',
             className,
           )}
         >
@@ -129,29 +131,32 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
           ) : (
             // UI when no file is selected
             <div className='pointer-events-none flex w-full flex-col items-center gap-3'>
-              <UploadIcon bgFill='#EDEDED' />
-              <p className='font-ccep-wide text-sm font-light'>Click to upload or drag and drop</p>
-              <p className='font-ccep-wide text-sm font-light'>{maxSizeText}</p>
+              {!onlyButton && (
+                <>
+                  <UploadIcon bgFill='#EDEDED' />
+                  <p className='font-ccep-wide text-sm font-light'>
+                    Click to upload or drag and drop
+                  </p>
+                  <p className='font-ccep-wide text-sm font-light'>{maxSizeText}</p>
 
-              <div className='mt-4 flex w-full items-center gap-2'>
-                <div className='flex-grow border-t border-gray-300'></div>
-                <span className='text-brown font-ccep-wide text-lg opacity-30'>OR</span>
-                <div className='flex-grow border-t border-gray-300'></div>
-              </div>
+                  <div className='mt-4 flex w-full items-center gap-2'>
+                    <div className='flex-grow border-t border-gray-300'></div>
+                    <span className='text-brown font-ccep-wide text-lg opacity-30'>OR</span>
+                    <div className='flex-grow border-t border-gray-300'></div>
+                  </div>
+                </>
+              )}
 
-              <Button fullWidth variant='black' className='md:w-max'>
-                BROWSE FILES
+              <Button
+                fullWidth
+                variant={buttonVariant}
+                className={clsx('md:w-max', buttonClassName)}
+              >
+                {buttonContent}
               </Button>
             </div>
           )}
         </div>
-
-        {/* {acceptedFiles.length > 0 && preview && (
-                    <p className="mt-2 text-sm text-gray-600 font-ccep-wide">
-                        Selected: <span className="font-medium">{acceptedFiles[0].name}</span> 
-                        <span className="text-gray-500"> ({formatFileSize(acceptedFiles[0].size)})</span>
-                    </p>
-                )} */}
 
         {fileRejections.length > 0 && (
           <p className='mt-2 text-sm text-red-500'>File not accepted (wrong type or too large)</p>

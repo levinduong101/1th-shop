@@ -41,7 +41,7 @@ export default function Menu() {
               width={233}
               height={42}
               alt='Coca Cola Logo'
-              className='h-9 lg:h-10.5'
+              className='h-9 w-auto lg:h-10.5'
             />
           </Link>
         </Container>

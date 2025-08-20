@@ -5,7 +5,7 @@ import React from 'react';
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'red' | 'black' | 'white';
+  variant?: 'red' | 'black' | 'white' | 'brown';
   size?: 'sm' | 'md' | 'lg';
   href?: string;
   target?: '_blank' | '_self' | '_parent' | '_top';
@@ -41,6 +41,8 @@ export const Button = ({
     red: 'bg-red-500 text-white hover:bg-red-600 hover:shadow-lg focus:ring-red-300 active:bg-red-700',
     black:
       'bg-black text-white hover:bg-gray-800 hover:shadow-lg focus:ring-gray-300 active:bg-gray-900',
+    brown:
+      'bg-brown text-white hover:bg-gray-800 hover:shadow-lg focus:ring-gray-300 active:bg-gray-900',
     white:
       'bg-white text-black border-2 border-brown hover:bg-gray-100 hover:shadow-lg focus:ring-gray-300 active:bg-gray-100',
   };
