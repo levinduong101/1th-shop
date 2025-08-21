@@ -3,7 +3,7 @@ import './globals.css';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Coca-Cola × Metro – Chefs in Town',
+  title: 'Coca-Cola × Chefs in Town',
   description:
     'Activation campaign platform for selected restaurants: branded hoodie orders & team video contest, powered by One-Click-Clothes-Store.',
 };
