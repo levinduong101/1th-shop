@@ -4,44 +4,33 @@ import { Check } from 'lucide-react';
 import React, { forwardRef } from 'react';
 
 type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  label?: string;
+  label?: string | React.ReactNode;
   error?: string;
   required?: boolean;
 };
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   ({ label, error, className, checked, onChange, ...props }, ref) => {
-    // Sử dụng checked từ props (từ register) thay vì internal state
     const isChecked = checked || false;
 
-    const handleClick = () => {
-      const newChecked = !isChecked;
-
-      // Trigger onChange cho register
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (onChange) {
-        const event = {
-          target: {
-            name: props.name,
-            checked: newChecked,
-            value: newChecked.toString(),
-            type: 'checkbox',
-          },
-          currentTarget: {
-            name: props.name,
-            checked: newChecked,
-            value: newChecked.toString(),
-            type: 'checkbox',
-          },
-        } as React.ChangeEvent<HTMLInputElement>;
-        onChange(event);
+        onChange(e);
       }
     };
 
     return (
       <div className='flex flex-col gap-1'>
-        <label className='flex cursor-pointer items-start gap-3' onClick={handleClick}>
+        <label className='flex cursor-pointer items-start gap-3'>
           {/* Hidden input for react-hook-form */}
-          <input ref={ref} type='checkbox' className='sr-only' {...props} />
+          <input
+            ref={ref}
+            type='checkbox'
+            className='sr-only'
+            checked={isChecked}
+            onChange={handleChange}
+            {...props}
+          />
 
           {/* Custom checkbox div */}
           <div
@@ -56,7 +45,11 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             {isChecked && <Check size={16} className='stroke-[3] text-white' />}
           </div>
 
-          <span className='text-brown font-ccep text-sm font-medium'>{label}</span>
+          {typeof label === 'string' ? (
+            <span className='text-brown font-ccep text-sm font-medium'>{label}</span>
+          ) : (
+            label
+          )}
         </label>
 
         {error && <p className='text-xs text-red-500'>{error}</p>}

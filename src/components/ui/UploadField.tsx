@@ -6,7 +6,7 @@ import React, { forwardRef, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
 import { Button } from './Button';
-import { UploadIcon } from './Icons';
+import { UploadIcon, UploadSimpleIcon } from './Icons';
 
 type UploadFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
@@ -90,7 +90,7 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
         <div
           {...getRootProps()}
           className={clsx(
-            'relative flex w-full cursor-pointer items-center justify-center border-gray-300 bg-white transition hover:bg-gray-50',
+            'group relative flex w-full cursor-pointer items-center justify-center border-gray-300 bg-white transition hover:bg-gray-50',
             isDragActive && 'border-blue-500 bg-blue-50',
             error && 'border-red-500',
             onlyButton && !preview
@@ -151,6 +151,8 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
                 fullWidth
                 variant={buttonVariant}
                 className={clsx('md:w-max', buttonClassName)}
+                iconAnimation={<UploadSimpleIcon fill='white' />}
+                animation='scaleIn'
               >
                 {buttonContent}
               </Button>

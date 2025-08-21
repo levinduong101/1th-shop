@@ -6,11 +6,12 @@ import Container from '../../ui/Container';
 
 export default function Header() {
   return (
-    <header className='fixed top-0 right-0 left-0 z-51'>
+    <header className='bg-pink fixed top-0 right-0 left-0 z-51'>
+      <div className='_bg absolute inset-0 -z-10' />
       <Container className='flex items-stretch justify-between py-4'>
         <Menu />
 
-        <Link href='/landing' className='bg-pink flex items-center rounded-full pl-2'>
+        <Link href='/landing' className='flex items-center rounded-full pl-2'>
           <Image
             src='/images/coca_cola_logo_red.svg'
             width={233}

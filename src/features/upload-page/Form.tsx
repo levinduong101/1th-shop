@@ -71,7 +71,7 @@ export default function Form() {
           {...register('agreement', { required: true })}
         />
 
-        <Button variant='red' arrowAnimation className='md:hidden'>
+        <Button variant='red' animation='scaleIn' className='md:hidden'>
           Submit Application
         </Button>
       </div>
@@ -79,7 +79,7 @@ export default function Form() {
       <div className='hidden flex-col gap-8 md:flex'>
         <UploadField className='h-[540px]' />
 
-        <Button variant='red' arrowAnimation type='submit'>
+        <Button variant='red' animation='scaleIn' type='submit'>
           Submit Application
         </Button>
       </div>

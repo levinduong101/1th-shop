@@ -29,7 +29,8 @@
     "swiper": "^11.2.10",
     "tailwind-merge": "^3.0.2",
     "yet-another-react-lightbox": "^3.25.0",
-    "zod": "^4.0.17"
+    "zod": "^4.0.17",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import React from 'react';
 
 interface ButtonProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   variant?: 'red' | 'black' | 'white' | 'brown';
   size?: 'sm' | 'md' | 'lg';
   href?: string;
@@ -15,7 +15,10 @@ interface ButtonProps {
   style?: React.CSSProperties;
   type?: 'button' | 'submit' | 'reset';
   fullWidth?: boolean;
-  arrowAnimation?: boolean;
+
+  // Icon animation props
+  iconAnimation?: React.ReactNode;
+  animation?: 'fadeUp' | 'scaleIn';
 }
 
 export const Button = ({
@@ -30,7 +33,8 @@ export const Button = ({
   style,
   type = 'button',
   fullWidth = false,
-  arrowAnimation = false,
+  animation,
+  iconAnimation = <ArrowRight />,
 }: ButtonProps) => {
   // Base styles - removed hover:scale-105 and transform
   const baseStyles =
@@ -70,6 +74,50 @@ export const Button = ({
     className,
   );
 
+  // Render icon with animation
+  const renderIcon = () => {
+    if (!animation) return null;
+
+    if (animation === 'scaleIn') {
+      return (
+        <div className='w-0 scale-0 overflow-hidden transition-all duration-300 group-hover:ml-2 group-hover:w-8 group-hover:scale-100'>
+          {React.cloneElement(iconAnimation as React.ReactElement<{ className?: string }>, {
+            className: clsx(
+              (iconAnimation as React.ReactElement<{ className?: string }>)?.props?.className,
+            ),
+          })}
+        </div>
+      );
+    }
+
+    if (animation === 'fadeUp') {
+      return (
+        <div className='relative ml-2 h-6 w-6 overflow-hidden'>
+          {/* Main icon - moves up on hover */}
+          <div className='absolute inset-0 transition-transform duration-300 group-hover:-translate-y-6'>
+            {React.cloneElement(iconAnimation as React.ReactElement<{ className?: string }>, {
+              className: clsx(
+                'w-6 h-6',
+                (iconAnimation as React.ReactElement<{ className?: string }>)?.props?.className,
+              ),
+            })}
+          </div>
+          {/* Duplicate icon - slides in from bottom */}
+          <div className='absolute inset-0 translate-y-6 transition-transform duration-300 group-hover:translate-y-0'>
+            {React.cloneElement(iconAnimation as React.ReactElement<{ className?: string }>, {
+              className: clsx(
+                'w-6 h-6',
+                (iconAnimation as React.ReactElement<{ className?: string }>)?.props?.className,
+              ),
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   // Common props for both button and link
   const commonProps = {
     className: combinedStyles,
@@ -82,13 +130,7 @@ export const Button = ({
     return (
       <Link href={href} target={target} {...commonProps} role='button' tabIndex={0}>
         {children}
-        <ArrowRight
-          className={clsx(
-            arrowAnimation
-              ? 'w-0 transition-all duration-300 group-hover:ml-2 group-hover:w-8'
-              : 'hidden',
-          )}
-        />
+        {renderIcon()}
       </Link>
     );
   }
@@ -97,13 +139,7 @@ export const Button = ({
   return (
     <button type={type} disabled={disabled} {...commonProps}>
       {children}
-      <ArrowRight
-        className={clsx(
-          arrowAnimation
-            ? 'w-0 transition-all duration-300 group-hover:ml-1 group-hover:w-8'
-            : 'hidden',
-        )}
-      />
+      {renderIcon()}
     </button>
   );
 };

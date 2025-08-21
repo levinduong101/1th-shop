@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Container from '@/src/components/ui/Container';
-import { Control, Controller, UseFormRegister } from 'react-hook-form';
-import { ProductFormValues } from '../validation/schema';
+import { Control, Controller } from 'react-hook-form';
+import { ProductFormValues } from '../lib/schema';
 import { FieldValues } from 'react-hook-form';
 import { Button } from '@/src/components/ui/Button';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
@@ -14,37 +14,24 @@ import Image from 'next/image';
 import Input from '@/src/components/ui/Input';
 
 type DialogProps<T extends FieldValues = ProductFormValues> = {
-  showProductPopup: (ProductFormValues & { isImage?: boolean }) | null;
-  setShowProductPopup: (open: ProductFormValues | null) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
   control: Control<T>;
-  register: UseFormRegister<{
-    size: string;
-    name: string;
-    file: File;
-  }>;
   file?: File | null;
+  error: string | undefined;
 };
 
-const MIN_FONT = 10;
-const MAX_FONT = 18;
-
-export default function DialogCustom({
-  control,
-  setShowProductPopup,
-  showProductPopup,
-  file,
-}: DialogProps) {
+export default function DialogCustom({ control, file, open, setOpen, error }: DialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  const nameRef = useRef<HTMLDivElement>(null);
+  const [isSelectedFile, setIsSelectedFile] = useState<boolean>(Boolean(file));
 
   /** Animation when open */
   useEffect(() => {
-    const isVisible = !!showProductPopup;
     if (dialogRef.current) {
-      dialogRef.current.style.display = isVisible ? 'block' : 'none';
+      dialogRef.current.style.display = open ? 'block' : 'none';
     }
 
-    if (isVisible && dialogRef.current) {
+    if (open && dialogRef.current) {
       gsap.fromTo(
         dialogRef.current,
         { opacity: 0, x: 100 },
@@ -53,18 +40,18 @@ export default function DialogCustom({
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isVisible) {
+      if (e.key === 'Escape' && open) {
         handleClose();
       }
     };
-    if (isVisible) {
+    if (open) {
       window.addEventListener('keydown', handleKeyDown);
     }
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showProductPopup?.isImage, showProductPopup?.name]);
+  }, [open]);
 
   /** Animation before close */
   const handleClose = () => {
@@ -75,42 +62,13 @@ export default function DialogCustom({
         duration: 0.2,
         ease: 'power2.in',
         onComplete: () => {
-          setShowProductPopup(null);
+          setOpen(false);
           dialogRef.current!.style.display = 'none';
           gsap.set(dialogRef.current, { x: 0 }); // reset position for next open
         },
       });
     }
   };
-
-  /** Tracking text */
-  useEffect(() => {
-    const el = nameRef.current;
-    if (!el) return;
-
-    const resize = () => {
-      if (!el) return;
-      let currentSize = MAX_FONT;
-
-      // reset về max font trước khi đo
-      el.style.fontSize = `${currentSize}px`;
-
-      while (
-        (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight) &&
-        currentSize > MIN_FONT
-      ) {
-        currentSize -= 1;
-        el.style.fontSize = `${currentSize}px`;
-      }
-    };
-
-    const observer = new ResizeObserver(resize);
-    observer.observe(el);
-
-    resize(); // chạy lần đầu
-
-    return () => observer.disconnect();
-  }, [showProductPopup?.name]);
 
   return (
     <div ref={dialogRef} className='fixed inset-0 z-100 hidden bg-white'>
@@ -120,6 +78,7 @@ export default function DialogCustom({
           'flex h-full flex-col gap-10',
         )}
       >
+        {/* Back */}
         <Button
           variant='white'
           className='h-12 w-12 flex-shrink-0 rounded-full border-3 !p-0'
@@ -139,76 +98,74 @@ export default function DialogCustom({
               className='h-full w-auto object-contain'
             />
 
-            {(file || showProductPopup?.name) && (
+            {file && (
               <div className='absolute inset-0 z-10 flex items-center justify-center'>
                 <div
                   className={clsx(
-                    'flex aspect-[566/300] w-2/5 translate-y-[10%] flex-col gap-1',
-                    file && showProductPopup?.isImage ? 'justify-center' : '',
+                    // 'flex h-1/5 w-2/5  translate-y-[10%] flex-col gap-1 relative',
+                    'relative flex aspect-[566/300] w-2/5 translate-y-[10%] flex-col justify-center gap-1',
                   )}
                 >
-                  {file && showProductPopup?.isImage && (
-                    <div className='w-full flex-1'>
-                      <Image
-                        src={URL.createObjectURL(file)}
-                        alt='Uploaded File'
-                        width={100}
-                        height={100}
-                        className='mx-auto max-h-full border-2 border-blue-600 object-contain'
-                      />
-                    </div>
-                  )}
-                  {showProductPopup?.name && (
-                    <div
-                      ref={nameRef}
-                      className='text-brown flex-shrink-0 text-center font-extrabold text-nowrap'
-                    >
-                      {showProductPopup.name}
-                    </div>
+                  {file && (
+                    <Image
+                      src={URL.createObjectURL(file)}
+                      alt='Uploaded File'
+                      layout='fill'
+                      className='mx-auto h-full object-contain'
+                    />
                   )}
                 </div>
               </div>
             )}
           </div>
         </div>
+        {error && <p className='ml-1 text-center text-xs text-red-500'>{error}</p>}
 
         {/* Buttons */}
         <div className='flex w-full flex-shrink-0 flex-col items-center justify-center gap-3 md:flex-row'>
-          {showProductPopup?.isImage && (
-            <div className='w-full max-w-[352px]'>
-              <Controller
-                name='file'
-                control={control}
-                rules={{ required: 'File is required' }}
-                render={({ field: { onChange, name } }) => (
-                  <Input
-                    type='file'
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        onChange(e.target.files[0]);
-                      }
-                    }}
-                    name={name}
-                    render={({ trigger }) => (
-                      <Button
-                        type='button'
-                        variant='white'
-                        fullWidth
-                        className='flex h-13 items-center justify-center gap-2 text-sm'
-                        onClick={trigger}
-                      >
-                        <span>UPLOAD FILES</span>
-                        <UploadSimpleIcon />
-                      </Button>
-                    )}
-                  />
-                )}
-              />
-            </div>
-          )}
-          <Button type='button' variant='brown' fullWidth className='h-13 max-w-[352px] text-sm'>
-            <span>PROCEED TO CHECKOUT</span>
-            <ChevronRight height={20} />
+          <div className='w-full max-w-[352px]'>
+            <Controller
+              name='file'
+              control={control}
+              rules={{ required: 'File is required' }}
+              render={({ field: { onChange, name } }) => (
+                <Input
+                  type='file'
+                  accept='image/*'
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      onChange(e.target.files[0]);
+                      setIsSelectedFile(true);
+                    }
+                  }}
+                  name={name}
+                  render={({ trigger }) => (
+                    <Button
+                      type='button'
+                      variant='white'
+                      fullWidth
+                      className='flex h-13 items-center justify-center text-sm'
+                      onClick={trigger}
+                      animation='fadeUp'
+                      iconAnimation={<UploadSimpleIcon />}
+                    >
+                      <span>UPLOAD FILES</span>
+                    </Button>
+                  )}
+                />
+              )}
+            />
+          </div>
+          <Button
+            type='submit'
+            variant='brown'
+            fullWidth
+            className='h-13 max-w-[352px] text-sm'
+            animation='fadeUp'
+            iconAnimation={<ChevronRight height={20} />}
+            disabled={!Boolean(isSelectedFile)}
+          >
+            PROCEED TO CHECKOUT
           </Button>
         </div>
       </Container>
