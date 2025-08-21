@@ -1,0 +1,239 @@
+'use client';
+import { Button } from '@/src/components/ui/Button';
+import Container from '@/src/components/ui/Container';
+import { useProductStore } from '@/src/store/productStore';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ArrowLeft, Pen } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { CheckoutFormValues, checkoutSchema } from './lib/schema';
+import { useState } from 'react';
+import Input from '@/src/components/ui/Input';
+import Checkbox from '@/src/components/ui/Checkbox';
+import { getColorClass } from '../product/lib/helper';
+import clsx from 'clsx';
+import { useCheckoutStore } from '@/src/store/checkoutStore';
+
+const defaultValues: CheckoutFormValues = {
+  email: '',
+  phone: '',
+  restaurantName: '',
+  street: '',
+  building: '',
+  district: '',
+  pinCode: '',
+};
+
+export default function CheckoutView() {
+  const router = useRouter();
+  const { formStore: productStore, setFormStore: setProductStore } = useProductStore();
+  const { formStore: checkoutStore, setFormStore: setCheckoutStore } = useCheckoutStore();
+  const [angreement, setAgreement] = useState<boolean>(false);
+
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+    watch,
+  } = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: checkoutStore || defaultValues,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    criteriaMode: 'all',
+    shouldFocusError: true,
+    shouldUnregister: true,
+  });
+
+  /** Handle back */
+  const onBack = () => {
+    router.push('/design-product');
+    setCheckoutStore(watch());
+  };
+
+  /** Handle submit form */
+  const onSubmit = (data: CheckoutFormValues) => {
+    // eslint-disable-next-line no-console
+    console.log('Checkout Data:', data);
+    setCheckoutStore(null);
+    setProductStore(null);
+    router.push('/confirm');
+  };
+
+  return (
+    <Container className='py-2.5 sm:py-5 md:py-7.5 lg:py-10'>
+      <Container className='flex w-full flex-col rounded-[28px] bg-white py-2.5 sm:py-5 md:py-7.5 lg:py-10'>
+        {/* Head */}
+        <div className='flex w-full items-center justify-between'>
+          <Button
+            variant='white'
+            className='h-12 w-12 flex-shrink-0 rounded-full border-3 !p-0'
+            onClick={onBack}
+          >
+            <ArrowLeft />
+          </Button>
+
+          <Link href='/landing' className='flex items-center rounded-full pl-2'>
+            <Image
+              src='/images/coca_cola_logo_red.svg'
+              width={233}
+              height={42}
+              alt='Coca Cola Logo'
+              className='h-9 w-auto lg:h-10.5'
+              priority
+            />
+          </Link>
+        </div>
+
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className='3xl:gap-x-20 mt-7.5 grid w-full gap-y-5 md:mt-10 md:grid-cols-2 md:gap-x-5 lg:mt-12.5 lg:gap-x-10'
+        >
+          {/* Infor */}
+          <div className='flex w-full flex-col gap-5 md:gap-7.5 lg:gap-10'>
+            <h1 className='text-[28px] lg:text-[32px]'>Checkout</h1>
+
+            {/* Contact infor */}
+            <div className='flex w-full flex-col gap-5'>
+              <h2 className='text-xl'>Contact Information</h2>
+              <div className='grid w-full grid-cols-1 gap-y-3'>
+                <Input
+                  label='E-mail address'
+                  required
+                  placeholder='Enter restaurant email'
+                  {...register('email')}
+                  className='border-2 font-light'
+                  error={errors.email?.message}
+                />
+                <Input
+                  label='Phone number'
+                  required
+                  placeholder='+48'
+                  {...register('phone')}
+                  className='border-2 font-light'
+                  error={errors.phone?.message}
+                />
+                <Input
+                  label='Restaurant name'
+                  required
+                  placeholder='Enter name of your restaurant'
+                  {...register('restaurantName')}
+                  className='border-2 font-light'
+                  error={errors.restaurantName?.message}
+                />
+              </div>
+            </div>
+
+            {/* Delivery */}
+            <div className='flex w-full flex-col gap-5'>
+              <h2 className='text-xl'>Delivery Address</h2>
+              <div className='grid w-full grid-cols-1 gap-y-3'>
+                <Input
+                  label='Street & Number'
+                  required
+                  placeholder='e.g. Main Street 123'
+                  {...register('street')}
+                  className='border-2 font-light'
+                  error={errors.street?.message}
+                />
+                <Input
+                  label='Building / Entrance / Floor'
+                  placeholder='e.g. Entrance B, 3rd Floor'
+                  {...register('building')}
+                  className='border-2 font-light'
+                  error={errors.building?.message}
+                />
+                <Input
+                  label='District / Area'
+                  placeholder='e.g. City Center'
+                  {...register('district')}
+                  className='border-2 font-light'
+                  error={errors.district?.message}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Order */}
+          <div className='flex w-full flex-col gap-7.5'>
+            <h2 className='text-xl'>Order Summary</h2>
+
+            <div className='flex w-full flex-col gap-3'>
+              {/* Card */}
+              {productStore?.file && (
+                <div className='font-ccep-wide flex gap-4 rounded-[20px] border-2 border-[#D9D9D9] p-4'>
+                  <Image
+                    src='/images/product-page/product.png'
+                    width={120}
+                    height={120}
+                    alt='Product Image'
+                    className='h-30 w-30 shrink-0 object-contain'
+                  />
+
+                  <div className='flex flex-col justify-between gap-5'>
+                    <div>
+                      <p className='text-sm font-normal lg:text-xl'>Coca-Cola Classic Hoodie</p>
+                      <div className='mt-2 flex items-center gap-1.5'>
+                        {productStore?.color && (
+                          <div
+                            className={clsx(
+                              'grid aspect-square h-9 shrink-0 place-items-center rounded-full border-2',
+                              getColorClass(productStore?.color),
+                            )}
+                          />
+                        )}
+                        <div className='bg-gray grid aspect-square w-9 shrink-0 place-items-center rounded-full text-sm'>
+                          {productStore?.size || 'L'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type='button'
+                      className='hover:bg-gray flex w-max cursor-pointer items-center gap-1.5 rounded-[20px] border border-[#D9D9D9] bg-white px-3 py-2 text-sm font-normal transition-colors duration-300'
+                      onClick={onBack}
+                    >
+                      Edit <Pen size={12} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Input
+              label='PIN Code'
+              required
+              placeholder='e.g 123456'
+              {...register('pinCode')}
+              className='border-2 font-light'
+              error={errors.pinCode?.message}
+            />
+
+            <Checkbox
+              label={
+                <span className='text-sm'>
+                  I agree to the <span className='text-red'>Terms & Conditions</span>
+                </span>
+              }
+              onChange={(e) => setAgreement(e.target.checked)}
+              checked={angreement}
+            />
+
+            <Button
+              type='submit'
+              variant='brown'
+              animation='scaleIn'
+              fullWidth
+              disabled={!angreement}
+            >
+              CONFIRM ORDER
+            </Button>
+          </div>
+        </form>
+      </Container>
+    </Container>
+  );
+}
