@@ -4,10 +4,10 @@ import axios from 'axios';
 const API_URL = process.env.API_URL || 'https://merch-base-dev.prowerb.digital';
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || '';
 
-export async function handler(req: NextRequest) {
+async function handleRequest(req: NextRequest) {
   const path = new URL(req.url).pathname.replace('/api', '');
   const url = `${API_URL}${path}`;
-  const method = req.method as 'GET' | 'POST' | 'PUT' | 'DELETE';
+  const method = req.method as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${ACCESS_TOKEN}`,
@@ -83,8 +83,22 @@ export async function handler(req: NextRequest) {
   }
 }
 
-export const GET = handler;
-export const POST = handler;
-export const PUT = handler;
-export const DELETE = handler;
-export const PATCH = handler;
+export async function GET(req: NextRequest) {
+  return handleRequest(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handleRequest(req);
+}
+
+export async function PUT(req: NextRequest) {
+  return handleRequest(req);
+}
+
+export async function DELETE(req: NextRequest) {
+  return handleRequest(req);
+}
+
+export async function PATCH(req: NextRequest) {
+  return handleRequest(req);
+}
