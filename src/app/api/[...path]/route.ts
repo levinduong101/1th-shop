@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
-const API_URL = process.env.API_URL || 'https://merch-base-dev.prowerb.digital';
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://merch-base-dev.prowerb.digital';
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || '';
 
 async function handleRequest(req: NextRequest) {
