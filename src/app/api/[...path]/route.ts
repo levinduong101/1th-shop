@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
-const API_URL = process.env.API_URL || 'https://merch-base.prowerb.digital/graphql';
+const API_URL = process.env.API_URL || 'https://merch-base-dev.prowerb.digital';
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || '';
 
 export async function handler(req: NextRequest) {
-  const url = req.nextUrl.searchParams.get('url') || '';
-  // if (!url) {
-  //     return NextResponse.json({ error: 'Missing target URL' }, { status: 400 });
-  // }
-
+  const path = new URL(req.url).pathname.replace('/api', '');
+  const url = `${API_URL}${path}`;
   const method = req.method as 'GET' | 'POST' | 'PUT' | 'DELETE';
 
   const headers: Record<string, string> = {
@@ -45,7 +42,7 @@ export async function handler(req: NextRequest) {
 
     // Call API
     const response = await axios({
-      url: `${API_URL}${url}`,
+      url,
       method,
       headers,
       data,

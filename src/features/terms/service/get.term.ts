@@ -1,4 +1,4 @@
-const API_URL = process.env.API_URL || 'https://merch-base.prowerb.digital/graphql';
+const API_URL = process.env.API_URL || 'https://merch-base.prowerb.digital';
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || '';
 
 const CMS_PAGE_QUERY = `
@@ -37,7 +37,7 @@ interface CmsPageResponse {
 
 export async function getTerms() {
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch(`${API_URL}/graphql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

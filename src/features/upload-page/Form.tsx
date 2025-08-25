@@ -1,88 +1,154 @@
 'use client';
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 
 import { Button } from '@/src/components/ui/Button';
 import Checkbox from '@/src/components/ui/Checkbox';
 import Input from '@/src/components/ui/Input';
 import Textarea from '@/src/components/ui/TextArea';
 import UploadField from '@/src/components/ui/UploadField';
+import Image from 'next/image';
+import AnimatedText from '@/src/components/ui/AnimatedText';
+import Container from '@/src/components/ui/Container';
+import { FormValues, formSchema } from './lib/schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCheckoutStore } from '@/src/store/checkoutStore';
+import { toast } from 'react-toastify';
+import { useUploadForm } from './hooks/useUploadForm';
+import { useRouter } from 'next/navigation';
+import { LoaderCircle } from 'lucide-react';
 
 export default function Form() {
-  const { register, handleSubmit, watch } = useForm({
+  const [agree, setAgree] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      restaurantName: '',
+      name: '',
       email: '',
-      description: '',
-      agreement: false,
+      message: '',
+      file: null as unknown as File, // Initial value for file input
     },
   });
+  const pinCode = useCheckoutStore((state) => state.formStore?.pinCode || '');
+  const router = useRouter();
+  const { submit, isLoading } = useUploadForm();
 
   /** Handle submit */
-  const onSubmit = (data: {
-    restaurantName: string;
-    email: string;
-    description: string;
-    agreement: boolean;
-  }) => {
-    // eslint-disable-next-line no-console
-    console.log(data);
+  const onSubmit = (data: FormValues) => {
+    if (!agree) return;
+
+    if (!pinCode) {
+      toast.error('Employee ID is missing!');
+      router.push('/');
+      return;
+    }
+
+    submit(data, pinCode);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='text-brown grid gap-15 md:grid-cols-2'>
-      <div className='flex flex-col gap-4 md:gap-7.5'>
-        <p className='font-ccep-wide mb-4 text-lg leading-[1] font-light lg:mb-6.5 lg:text-2xl'>
-          Show us what makes your team special for a chance to win an exclusive Coca-Cola sponsored
-          team event! This is your opportunity to share your team&apos;s passion, creativity, and
-          energy with us.
-        </p>
-
-        <Input
-          label='Restaurant name'
-          required
-          placeholder='Restaurant name'
-          {...register('restaurantName', { required: true })}
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className='mx-auto mt-15 flex max-w-[1143px] flex-col gap-3 pb-[70px] lg:mt-11.5 lg:gap-13 lg:pb-20'
+    >
+      <div className='col-span-full flex items-center gap-5.5 pr-3'>
+        <Image
+          src='/images/upload-page/arrow_right.svg'
+          width={96}
+          height={35}
+          alt='Arrow right'
+          className='h-auto w-24'
         />
+        <h2 className='font-ccep-wide 3xl:text-[50px] text-brown text-[35px] leading-[1.2] font-bold lg:text-[40px]'>
+          <AnimatedText as='span' animation='fromRight' split='chars' duration={0.5}>
+            Submit Your
+          </AnimatedText>
+          <br />
+          <AnimatedText as='span' animation='fromRight' split='chars' duration={0.5} delay={0.5}>
+            Team Video
+          </AnimatedText>
+        </h2>
+      </div>
 
-        <Input
-          label='Email'
-          type='email'
-          required
-          placeholder='Email'
-          {...register('email', { required: true })}
-        />
+      <Container className='w-full lg:!px-0'>
+        <div className='text-brown grid gap-15 md:grid-cols-2'>
+          <div className='flex flex-col gap-4 md:gap-7.5'>
+            <p className='font-ccep-wide mb-4 text-lg leading-[1] font-light lg:mb-6.5 lg:text-2xl'>
+              Show us what makes your team special for a chance to win an exclusive Coca-Cola
+              sponsored team event! This is your opportunity to share your team&apos;s passion,
+              creativity, and energy with us.
+            </p>
 
-        <Textarea
-          label='Tell us about your team'
-          placeholder='A short description of your team'
-          rows={6}
-          {...register('description', { required: true })}
-        />
+            <Input
+              label='Restaurant name'
+              required
+              placeholder='Restaurant name'
+              {...register('name', { required: true })}
+              error={errors.name?.message}
+            />
 
-        <div className='md:hidden'>
-          <UploadField />
+            <Input
+              label='Email'
+              type='email'
+              required
+              placeholder='Email'
+              {...register('email', { required: true })}
+              error={errors.email?.message}
+            />
+
+            <Textarea
+              label='Tell us about your team'
+              placeholder='A short description of your team'
+              rows={6}
+              {...register('message', { required: true })}
+            />
+
+            <div className='md:hidden'>
+              <Controller
+                name='file'
+                control={control}
+                rules={{ required: 'File is required' }}
+                render={({ field }) => <UploadField field={field} error={errors.file?.message} />}
+              />
+            </div>
+
+            <Checkbox
+              label='I agree that Coca-Cola and Metro may use this video for promotional purposes related to the Chefs in Town festival.'
+              required
+              checked={agree}
+              onChange={() => setAgree(!agree)}
+            />
+
+            <Button variant='red' animation='scaleIn' className='md:hidden'>
+              Submit Application
+            </Button>
+          </div>
+
+          <div className='hidden flex-col gap-8 md:flex'>
+            <Controller
+              name='file'
+              control={control}
+              rules={{ required: 'File is required' }}
+              render={({ field }) => (
+                <UploadField field={field} error={errors.file?.message} className='h-[540px]' />
+              )}
+            />
+
+            <Button variant='red' animation='scaleIn' type='submit' disabled={!agree || isLoading}>
+              {isLoading ? (
+                <LoaderCircle className='mx-auto h-7 animate-spin' />
+              ) : (
+                'Submit Application'
+              )}
+            </Button>
+          </div>
         </div>
-
-        <Checkbox
-          label='I agree that Coca-Cola and Metro may use this video for promotional purposes related to the Chefs in Town festival.'
-          required
-          checked={watch('agreement')}
-          {...register('agreement', { required: true })}
-        />
-
-        <Button variant='red' animation='scaleIn' className='md:hidden'>
-          Submit Application
-        </Button>
-      </div>
-
-      <div className='hidden flex-col gap-8 md:flex'>
-        <UploadField className='h-[540px]' />
-
-        <Button variant='red' animation='scaleIn' type='submit'>
-          Submit Application
-        </Button>
-      </div>
+      </Container>
     </form>
   );
 }

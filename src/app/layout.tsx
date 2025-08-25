@@ -1,6 +1,7 @@
 import { JSX } from 'react';
 import './globals.css';
 import { Metadata } from 'next';
+import { ToastContainer } from 'react-toastify';
 
 export const metadata: Metadata = {
   title: 'Coca-Cola × Chefs in Town',
@@ -15,7 +16,20 @@ interface Props {
 export default function RootLayout({ children }: Readonly<Props>): JSX.Element {
   return (
     <html lang='en'>
-      <body className={`antialiased`}>{children}</body>
+      <body className={`antialiased`}>
+        <ToastContainer
+          position='top-right'
+          autoClose={3000}
+          hideProgressBar={true}
+          newestOnTop
+          closeOnClick
+          pauseOnHover={false}
+          draggable
+          theme='light'
+        />
+
+        {children}
+      </body>
     </html>
   );
 }
