@@ -47,10 +47,15 @@ export default function CheckoutView() {
     shouldUnregister: true,
   });
 
+  /** Handle store data */
+  const onStoreData = () => {
+    setCheckoutStore(watch());
+  };
+
   /** Handle back */
   const onBack = () => {
     router.push('/design-product');
-    setCheckoutStore(watch());
+    onStoreData();
   };
 
   /** Handle submit form */
@@ -214,9 +219,12 @@ export default function CheckoutView() {
 
             <Checkbox
               label={
-                <span className='text-sm'>
-                  I agree to the <span className='text-red'>Terms & Conditions</span>
-                </span>
+                <div className='text-sm'>
+                  <span>I agree to the</span>{' '}
+                  <Link href='/terms' className='text-red hover:underline' onClick={onStoreData}>
+                    Terms & Conditions
+                  </Link>
+                </div>
               }
               onChange={(e) => setAgreement(e.target.checked)}
               checked={angreement}

@@ -6,7 +6,6 @@ import Divider from '@/src/components/ui/divider';
 
 import Form from './Form';
 import AnimatedSingleElement from '@/src/components/ui/AnimatedSingleElement';
-import AnimatedText from '@/src/components/ui/AnimatedText';
 
 export default function UploadView() {
   return (
@@ -47,30 +46,7 @@ export default function UploadView() {
       </div>
 
       {/* Submit video */}
-      <div className='mx-auto mt-15 flex max-w-[1143px] flex-col gap-3 pb-[70px] lg:mt-11.5 lg:gap-13 lg:pb-20'>
-        <div className='col-span-full flex items-center gap-5.5 pr-3'>
-          <Image
-            src='/images/upload-page/arrow_right.svg'
-            width={96}
-            height={35}
-            alt='Arrow right'
-            className='h-auto w-24'
-          />
-          <h2 className='font-ccep-wide 3xl:text-[50px] text-brown text-[35px] leading-[1.2] font-bold lg:text-[40px]'>
-            <AnimatedText as='span' animation='fromRight' split='chars' duration={0.5}>
-              Submit Your
-            </AnimatedText>
-            <br />
-            <AnimatedText as='span' animation='fromRight' split='chars' duration={0.5} delay={0.5}>
-              Team Video
-            </AnimatedText>
-          </h2>
-        </div>
-
-        <Container className='w-full lg:!px-0'>
-          <Form />
-        </Container>
-      </div>
+      <Form />
     </div>
   );
 }

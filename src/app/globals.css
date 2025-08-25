@@ -261,3 +261,17 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+#terms-page {
+  h4 {
+    @apply mb-5 text-2xl;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold
+  }
+
+  h3 {
+    @apply font-semibold text-xl
+  }
+}

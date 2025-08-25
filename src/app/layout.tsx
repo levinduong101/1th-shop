@@ -1,9 +1,10 @@
 import { JSX } from 'react';
 import './globals.css';
 import { Metadata } from 'next';
+import { ToastContainer } from 'react-toastify';
 
 export const metadata: Metadata = {
-  title: 'Coca-Cola × Metro – Chefs in Town',
+  title: 'Coca-Cola × Chefs in Town',
   description:
     'Activation campaign platform for selected restaurants: branded hoodie orders & team video contest, powered by One-Click-Clothes-Store.',
 };
@@ -15,7 +16,20 @@ interface Props {
 export default function RootLayout({ children }: Readonly<Props>): JSX.Element {
   return (
     <html lang='en'>
-      <body className={`antialiased`}>{children}</body>
+      <body className={`antialiased`}>
+        <ToastContainer
+          position='top-right'
+          autoClose={3000}
+          hideProgressBar={true}
+          newestOnTop
+          closeOnClick
+          pauseOnHover={false}
+          draggable
+          theme='light'
+        />
+
+        {children}
+      </body>
     </html>
   );
 }

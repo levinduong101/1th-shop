@@ -9,6 +9,7 @@ import { Button } from './Button';
 import { UploadIcon, UploadSimpleIcon } from './Icons';
 
 type UploadFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  field?: any;
   label?: string;
   error?: string;
   required?: boolean;
@@ -22,24 +23,22 @@ type UploadFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
 };
 
 const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
-  (
-    {
-      label,
-      error,
-      required,
-      className,
-      accept = 'video',
-      maxSize = 200 * 1024 * 1024, // 200MB
-      maxSizeText = 'MP4 or MOV — max file size 200 MB',
-      multiple = false,
-      onlyButton = false,
-      buttonClassName = '',
-      buttonVariant = 'black',
-      buttonContent = 'BROWSE FILES',
-      ...props
-    },
-    ref,
-  ) => {
+  ({
+    field,
+    label,
+    error,
+    required,
+    className,
+    accept = 'video',
+    maxSize = 200 * 1024 * 1024, // 200MB
+    maxSizeText = 'MP4 or MOV — max file size 200 MB',
+    multiple = false,
+    onlyButton = false,
+    buttonClassName = '',
+    buttonVariant = 'black',
+    buttonContent = 'BROWSE FILES',
+    ...props
+  }) => {
     const [preview, setPreview] = useState<string | null>(null);
     const [fileType, setFileType] = useState<string | null>(null); // Store file type
 
@@ -64,6 +63,9 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
           const url = URL.createObjectURL(file);
           setPreview(url);
           setFileType(file.type); // Store MIME type
+          if (field && field?.onChange) {
+            field.onChange(file);
+          }
         }
       },
     });
@@ -100,7 +102,7 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
           )}
         >
           {/* Hidden input for register/control */}
-          <input ref={ref} {...getInputProps({ ...props })} />
+          <input ref={field?.ref} {...getInputProps({ ...props })} />
 
           {/* If there is a preview => show thumbnail */}
           {preview ? (
