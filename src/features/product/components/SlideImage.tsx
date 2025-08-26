@@ -14,9 +14,10 @@ import 'yet-another-react-lightbox/styles.css';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 import { Button } from '@/src/components/ui/Button';
+import { MediaGalleryItem } from '../service/get.product';
 
 type SlideImageProps = {
-  images: string[];
+  images: MediaGalleryItem[];
 };
 
 export default function SlideImage({ images }: SlideImageProps) {
@@ -64,7 +65,7 @@ export default function SlideImage({ images }: SlideImageProps) {
             >
               <div className='flex justify-center'>
                 <Image
-                  src={img}
+                  src={img.url}
                   alt={`Slide ${i}`}
                   width={600}
                   height={600}
@@ -96,7 +97,7 @@ export default function SlideImage({ images }: SlideImageProps) {
                   ref={(el) => {
                     thumbRefs.current[i] = el;
                   }}
-                  src={img}
+                  src={img.url}
                   width={90}
                   height={90}
                   className={clsx(
@@ -137,7 +138,7 @@ export default function SlideImage({ images }: SlideImageProps) {
         open={open}
         close={() => setOpen(false)}
         index={index}
-        slides={images.map((img) => ({ src: img }))}
+        slides={images.map((img) => ({ src: img.url }))}
       />
     </>
   );

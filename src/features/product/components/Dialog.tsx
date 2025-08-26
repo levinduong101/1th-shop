@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Container from '@/src/components/ui/Container';
 import { Control, Controller } from 'react-hook-form';
 import { ProductFormValues } from '../lib/schema';
@@ -19,11 +19,18 @@ type DialogProps<T extends FieldValues = ProductFormValues> = {
   control: Control<T>;
   file?: File | null;
   error: string | undefined;
+  imageUrl: string;
 };
 
-export default function DialogCustom({ control, file, open, setOpen, error }: DialogProps) {
+export default function DialogCustom({
+  control,
+  file,
+  open,
+  setOpen,
+  error,
+  imageUrl,
+}: DialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  const [isSelectedFile, setIsSelectedFile] = useState<boolean>(Boolean(file));
 
   /** Animation when open */
   useEffect(() => {
@@ -91,7 +98,7 @@ export default function DialogCustom({ control, file, open, setOpen, error }: Di
         <div className='grid flex-1 place-items-center'>
           <div className='relative h-full'>
             <Image
-              src='/images/product-page/product.png'
+              src={imageUrl}
               width={500}
               height={500}
               alt='Product Image'
@@ -135,7 +142,6 @@ export default function DialogCustom({ control, file, open, setOpen, error }: Di
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
                       onChange(e.target.files[0]);
-                      setIsSelectedFile(true);
                     }
                   }}
                   name={name}
@@ -163,7 +169,7 @@ export default function DialogCustom({ control, file, open, setOpen, error }: Di
             className='h-13 max-w-[352px] text-sm'
             animation='fadeUp'
             iconAnimation={<ChevronRight height={20} />}
-            disabled={!Boolean(isSelectedFile)}
+            disabled={!Boolean(file)}
           >
             PROCEED TO CHECKOUT
           </Button>
