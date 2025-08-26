@@ -1,15 +1,15 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://merch-base-dev.prowerb.digital',
-  timeout: 60000,
+const apiProxy = axios.create({
+  baseURL: '/api',
+  timeout: 300000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-apiClient.interceptors.response.use(
+apiProxy.interceptors.response.use(
   (res) => res.data,
   (error) => {
     if (typeof window !== 'undefined') {
@@ -19,4 +19,4 @@ apiClient.interceptors.response.use(
   },
 );
 
-export default apiClient;
+export default apiProxy;

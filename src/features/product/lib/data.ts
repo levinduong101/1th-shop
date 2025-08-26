@@ -1,5 +1,3 @@
-export const SIZE: Size[] = ['S', 'M', 'L', 'XL', '2XL', '3XL'];
-
 export const SIZE_CHART = [
   { eu: 'S', chest: '92–96 cm', waist: '76–80 cm' },
   { eu: 'M', chest: '96–100 cm', waist: '80–84 cm' },
@@ -8,8 +6,3 @@ export const SIZE_CHART = [
   { eu: '2XL', chest: '108–112 cm', waist: '92–96 cm' },
   { eu: '3XL', chest: '112–116 cm', waist: '96–100 cm' },
 ];
-
-export const COLOR: Color[] = ['RED', 'WHITE', 'GRAY'];
-
-export type Color = 'RED' | 'WHITE' | 'GRAY';
-export type Size = 'S' | 'M' | 'L' | 'XL' | '2XL' | '3XL';

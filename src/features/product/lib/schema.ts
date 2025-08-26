@@ -1,13 +1,8 @@
 import { z } from 'zod';
-import { COLOR, SIZE } from './data';
 
 export const ProductFormSchema = z.object({
-  size: z.enum(SIZE, {
-    error: 'Size is required',
-  }),
-  color: z.enum(COLOR, {
-    error: 'Color is required',
-  }),
+  size: z.string().min(1, 'Size is required'),
+  color: z.string().min(1, 'Color is required'),
   file: z
     .instanceof(File, { message: 'You must upload a file to continue' })
     .refine((f) => f.type?.startsWith('image/'), 'File must be an image'),
