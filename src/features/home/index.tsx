@@ -7,8 +7,8 @@ import Divider from '@/src/components/ui/divider';
 import { XIcon } from '@/src/components/ui/Icons';
 import AnimatedSingleElement from '@/src/components/ui/AnimatedSingleElement';
 import AnimatedText from '@/src/components/ui/AnimatedText';
-import Redirect from './Redirect';
-import PopupWrapper from './PopupWrapper';
+import Redirect from './components/Redirect';
+import PopupWrapper from './components/PopupWrapper';
 
 export default function HomeView() {
   return (

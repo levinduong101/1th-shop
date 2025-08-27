@@ -1,4 +1,4 @@
-import { apiGraphQL } from '@/src/lib/api-graphql';
+import { apiGraphQLServer } from '@/src/lib/api-graphql-server';
 
 const CMS_PAGE_QUERY = `
   query CmsPage($identifier: String!) {
@@ -35,7 +35,7 @@ interface CmsPageResponse {
 }
 
 export async function getTerms() {
-  const data = await apiGraphQL<CmsPageResponse>(CMS_PAGE_QUERY, {
+  const data = await apiGraphQLServer<CmsPageResponse>(CMS_PAGE_QUERY, {
     identifier: 'privacy-policy-cookie-restriction-mode',
   });
 

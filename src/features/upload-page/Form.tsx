@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Button } from '@/src/components/ui/Button';
@@ -12,31 +12,42 @@ import AnimatedText from '@/src/components/ui/AnimatedText';
 import Container from '@/src/components/ui/Container';
 import { FormValues, formSchema } from './lib/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCheckoutStore } from '@/src/store/checkoutStore';
 import { toast } from 'react-toastify';
 import { useUploadForm } from './hooks/useUploadForm';
 import { useRouter } from 'next/navigation';
 import { LoaderCircle } from 'lucide-react';
+import { useAuthStore } from '@/src/store/authStore';
 
 export default function Form() {
   const [agree, setAgree] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const pinCode = useAuthStore((state) => state.pinCode);
+  const router = useRouter();
+  const { submit, isLoading } = useUploadForm();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     control,
+    setValue,
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      email: '',
+      name: user ? user.name : '',
+      email: user ? user.email : '',
       message: '',
-      file: null as unknown as File, // Initial value for file input
+      file: null as unknown as File,
     },
   });
-  const pinCode = useCheckoutStore((state) => state.formStore?.pinCode || '');
-  const router = useRouter();
-  const { submit, isLoading } = useUploadForm();
+
+  /** Sync user - form */
+  useEffect(() => {
+    if (user) {
+      setValue('email', user.email || '');
+      setValue('name', user.name || '');
+    }
+  }, [user, setValue]);
 
   /** Handle submit */
   const onSubmit = (data: FormValues) => {
@@ -88,8 +99,13 @@ export default function Form() {
               label='Restaurant name'
               required
               placeholder='Restaurant name'
-              {...register('name', { required: true })}
               error={errors.name?.message}
+              {...(user?.name
+                ? {
+                    value: user.name,
+                    disabled: true,
+                  }
+                : { ...register('name', { required: true }) })}
             />
 
             <Input
@@ -97,8 +113,13 @@ export default function Form() {
               type='email'
               required
               placeholder='Email'
-              {...register('email', { required: true })}
               error={errors.email?.message}
+              {...(user?.email
+                ? {
+                    value: user.email,
+                    disabled: true,
+                  }
+                : { ...register('email', { required: true }) })}
             />
 
             <Textarea

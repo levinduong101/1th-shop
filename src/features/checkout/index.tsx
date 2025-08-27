@@ -9,43 +9,55 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { CheckoutFormValues, checkoutSchema } from './lib/schema';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Input from '@/src/components/ui/Input';
 import Checkbox from '@/src/components/ui/Checkbox';
 import { getColorClass } from '../product/lib/helper';
 import clsx from 'clsx';
 import { useCheckoutStore } from '@/src/store/checkoutStore';
-
-const defaultValues: CheckoutFormValues = {
-  email: '',
-  phone: '',
-  restaurantName: '',
-  street: '',
-  building: '',
-  district: '',
-  pinCode: '',
-};
+import { useCheckout } from './hooks/useCheckout';
+import { useAuthStore } from '@/src/store/authStore';
+import { toast } from 'react-toastify';
 
 export default function CheckoutView() {
   const router = useRouter();
-  const { formStore: productStore, setFormStore: setProductStore } = useProductStore();
+  const { formStore: productStore } = useProductStore();
   const { formStore: checkoutStore, setFormStore: setCheckoutStore } = useCheckoutStore();
   const [angreement, setAgreement] = useState<boolean>(false);
+  const { isLoading, submit } = useCheckout();
+  const pinCode = useAuthStore((state) => state.pinCode);
+  const user = useAuthStore((state) => state.user);
 
   const {
     handleSubmit,
     register,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: checkoutStore || defaultValues,
+    defaultValues: checkoutStore || {
+      email: user?.email || '',
+      phone: '',
+      restaurantName: user?.name || '',
+      street: '',
+      building: '',
+      district: '',
+    },
     mode: 'onChange',
     reValidateMode: 'onChange',
     criteriaMode: 'all',
     shouldFocusError: true,
     shouldUnregister: true,
   });
+
+  /** Sync user - form */
+  useEffect(() => {
+    if (user) {
+      setValue('email', user.email || '');
+      setValue('restaurantName', user.name || '');
+    }
+  }, [user, setValue]);
 
   /** Handle store data */
   const onStoreData = () => {
@@ -60,11 +72,13 @@ export default function CheckoutView() {
 
   /** Handle submit form */
   const onSubmit = (data: CheckoutFormValues) => {
-    // eslint-disable-next-line no-console
-    console.log('Checkout Data:', data);
-    setCheckoutStore(null);
-    setProductStore(null);
-    router.push('/confirm');
+    if (!pinCode) {
+      toast.error('Employee ID is missing!');
+      router.push('/');
+      return;
+    }
+
+    submit(data, pinCode);
   };
 
   return (
@@ -109,15 +123,33 @@ export default function CheckoutView() {
                   label='E-mail address'
                   required
                   placeholder='Enter restaurant email'
-                  {...register('email')}
                   className='border-2 font-light'
                   error={errors.email?.message}
+                  {...(user?.email
+                    ? {
+                        value: user.email,
+                        disabled: true,
+                      }
+                    : { ...register('email', { required: true }) })}
                 />
                 <Input
                   label='Phone number'
                   required
                   placeholder='+48'
                   {...register('phone')}
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    value = value.replace(/[^+\d]/g, '');
+
+                    if (value.startsWith('+')) {
+                      value = '+' + value.slice(1).replace(/\D/g, '');
+                    } else {
+                      value = value.replace(/\D/g, '');
+                    }
+
+                    value = value.slice(0, 21);
+                    setValue('phone', value);
+                  }}
                   className='border-2 font-light'
                   error={errors.phone?.message}
                 />
@@ -125,9 +157,14 @@ export default function CheckoutView() {
                   label='Restaurant name'
                   required
                   placeholder='Enter name of your restaurant'
-                  {...register('restaurantName')}
                   className='border-2 font-light'
                   error={errors.restaurantName?.message}
+                  {...(user?.name
+                    ? {
+                        value: user.name,
+                        disabled: true,
+                      }
+                    : { ...register('restaurantName', { required: true }) })}
                 />
               </div>
             </div>
@@ -212,9 +249,9 @@ export default function CheckoutView() {
               label='PIN Code'
               required
               placeholder='e.g 123456'
-              {...register('pinCode')}
-              className='border-2 font-light'
-              error={errors.pinCode?.message}
+              value={pinCode || ''}
+              disabled={true}
+              className='!bg-gray border-2 font-light'
             />
 
             <Checkbox
@@ -235,7 +272,7 @@ export default function CheckoutView() {
               variant='brown'
               animation='scaleIn'
               fullWidth
-              disabled={!angreement}
+              disabled={!angreement || isLoading}
             >
               CONFIRM ORDER
             </Button>

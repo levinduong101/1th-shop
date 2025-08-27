@@ -2,13 +2,11 @@
 
 import AnimatedSingleElement from '@/src/components/ui/AnimatedSingleElement';
 import { Button } from '@/src/components/ui/Button';
-import { useCheckoutStore } from '@/src/store/checkoutStore';
+import { useAuthStore } from '@/src/store/authStore';
 import Image from 'next/image';
-import { useMemo } from 'react';
 
 export default function Redirect() {
-  const checkoutStore = useCheckoutStore((state) => state.formStore);
-  const hasPinCode = useMemo(() => checkoutStore?.pinCode, [checkoutStore?.pinCode]);
+  const pinCode = useAuthStore((state) => state.pinCode);
 
   return (
     <div className='relative mb-[100px] flex w-full max-w-[560px] flex-col gap-3'>
@@ -18,7 +16,7 @@ export default function Redirect() {
           variant='white'
           href='/design-product'
           animation='scaleIn'
-          disabled={!hasPinCode}
+          disabled={!Boolean(pinCode)}
         >
           DESIGN YOUR TEAM HOODIE
         </Button>
@@ -29,7 +27,7 @@ export default function Redirect() {
           variant='black'
           href='/upload-video'
           animation='scaleIn'
-          disabled={!hasPinCode}
+          disabled={!Boolean(pinCode)}
         >
           SUBMIT A TEAM VIDEO
         </Button>

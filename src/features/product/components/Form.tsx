@@ -56,6 +56,7 @@ export default function Form({ product }: { product: Product | null }) {
   useEffect(() => {
     reset(
       formStore || {
+        productName: product?.name || '',
         size: OPTIONS?.find((opt) => opt.title.toLowerCase().includes('size'))?.values?.[0] || '',
         color: OPTIONS?.find((opt) => opt.title.toLowerCase().includes('color'))?.values?.[0] || '',
         file: null as unknown as File,
@@ -247,12 +248,13 @@ export default function Form({ product }: { product: Product | null }) {
       <div className='h-[1px] w-full bg-[#F1F2F3]' />
 
       <Button
-        type='submit'
+        type='button'
         variant='red'
         fullWidth
         className='h-11 lg:h-13'
         animation='scaleIn'
         disabled={!selectedFile}
+        onClick={() => setOpenDialog(true)}
       >
         CONTINUE
       </Button>

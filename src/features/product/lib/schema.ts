@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const ProductFormSchema = z.object({
+  productName: z.string().min(1, 'Product name is required'),
   size: z.string().min(1, 'Size is required'),
   color: z.string().min(1, 'Color is required'),
   file: z
