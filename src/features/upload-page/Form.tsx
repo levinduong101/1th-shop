@@ -94,7 +94,7 @@ export default function Form() {
           </h2>
         </div>
 
-        <Container className='w-full lg:!px-0'>
+        <Container className='w-full xl:!px-0'>
           <div className='text-brown grid gap-15 md:grid-cols-2'>
             <div className='flex flex-col gap-4 md:gap-7.5'>
               <p className='font-ccep-wide mb-4 text-lg leading-[1] font-light lg:mb-6.5 lg:text-2xl'>
@@ -153,8 +153,23 @@ export default function Form() {
                 onChange={() => setAgree(!agree)}
               />
 
-              <Button variant='red' animation='scaleIn' className='md:hidden'>
-                Submit Application
+              <Button
+                className='md:hidden'
+                variant='red'
+                animation='scaleIn'
+                disabled={!agree || isLoading}
+                {...(user?.video
+                  ? {
+                      type: 'button',
+                      onClick: handleSubmit(onOpenConfirm),
+                    }
+                  : { type: 'submit' })}
+              >
+                {isLoading ? (
+                  <LoaderCircle className='mx-auto h-7 animate-spin' />
+                ) : (
+                  'Submit Application'
+                )}
               </Button>
             </div>
 
@@ -172,7 +187,7 @@ export default function Form() {
                 variant='red'
                 animation='scaleIn'
                 disabled={!agree || isLoading}
-                {...(user?.isUploaded
+                {...(user?.video
                   ? {
                       type: 'button',
                       onClick: handleSubmit(onOpenConfirm),

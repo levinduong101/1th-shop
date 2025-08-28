@@ -38,7 +38,7 @@ export function DialogConfirm({
 }: DialogConfirmProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className={cn('max-w-md', className)} showCloseButton={false}>
+      <DialogContent className={cn('sm:max-w-[425px]', className)} showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

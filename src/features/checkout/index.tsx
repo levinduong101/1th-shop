@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, LoaderCircle, Pen } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { CheckoutFormValues, checkoutSchema } from './lib/schema';
 import { useEffect, useState } from 'react';
@@ -28,6 +28,15 @@ export default function CheckoutView() {
   const pinCode = useAuthStore((state) => state.pinCode);
   const user = useAuthStore((state) => state.user);
 
+  /** Check if not select variant */
+  useEffect(() => {
+    if (!productStore) {
+      toast.error('Please design your product first!');
+      redirect('/design-product');
+    }
+  }, [productStore]);
+
+  /** Use form */
   const {
     handleSubmit,
     register,
@@ -208,7 +217,7 @@ export default function CheckoutView() {
               {productStore?.file && (
                 <div className='font-ccep-wide flex gap-4 rounded-[20px] border-2 border-[#D9D9D9] p-4'>
                   <Image
-                    src='/images/product-page/product.png'
+                    src={productStore?.selectedImage}
                     width={120}
                     height={120}
                     alt='Product Image'
