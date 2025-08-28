@@ -9,12 +9,18 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('Hydrating...');
     useAuthStore.persist.onFinishHydration(() => {
+      // eslint-disable-next-line no-console
+      console.log('Hydrated', useAuthStore.getState().pinCode);
       setHydrated(true);
     });
   }, []);
 
   if (!hydrated) {
+    // eslint-disable-next-line no-console
+    console.log('Not hydrated yet', hydrated);
     return null;
   }
 
