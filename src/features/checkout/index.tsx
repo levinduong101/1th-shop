@@ -144,7 +144,7 @@ export default function CheckoutView() {
                 <Input
                   label='Phone number'
                   required
-                  placeholder='+48'
+                  placeholder='+1 212 555 1234'
                   {...register('phone')}
                   onChange={(e) => {
                     let value = e.target.value;
