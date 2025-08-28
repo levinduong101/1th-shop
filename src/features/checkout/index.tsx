@@ -3,7 +3,7 @@ import { Button } from '@/src/components/ui/Button';
 import Container from '@/src/components/ui/Container';
 import { useProductStore } from '@/src/store/productStore';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Pen } from 'lucide-react';
+import { ArrowLeft, LoaderCircle, Pen } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -274,7 +274,7 @@ export default function CheckoutView() {
               fullWidth
               disabled={!angreement || isLoading}
             >
-              CONFIRM ORDER
+              {isLoading ? <LoaderCircle className='mx-auto h-7 animate-spin' /> : 'CONFIRM ORDER'}
             </Button>
           </div>
         </form>

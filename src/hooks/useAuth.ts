@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 export type User = {
   name: string;
   email: string;
+  isUploaded: 0 | 1;
 };
 
 export type AuthResponse = {
@@ -45,7 +46,7 @@ export const useAuth = () => {
         const { user } = data?.getEmployeeByCcepNummer;
 
         if (pinCode) setPinCode(pinCode);
-        if (user) setUser(user);
+        if (user) setUser({ isUploaded: 0, ...user });
       } catch (error: any) {
         toast.error(error?.message || 'Authentication failed. Please try again.');
       } finally {

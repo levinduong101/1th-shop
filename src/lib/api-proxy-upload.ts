@@ -13,7 +13,11 @@ apiProxyUpload.interceptors.response.use(
   (res) => res.data,
   (error) => {
     if (typeof window !== 'undefined') {
-      toast.error(error.response?.data?.message || 'An error occurred.');
+      toast.error(
+        error.response?.data?.parameters?.[0] ||
+          error.response?.data?.message ||
+          'An error occurred.',
+      );
     }
     return Promise.reject(error);
   },

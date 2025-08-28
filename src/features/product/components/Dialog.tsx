@@ -138,7 +138,7 @@ export default function DialogCustom({
               render={({ field: { onChange, name } }) => (
                 <Input
                   type='file'
-                  accept='image/*'
+                  accept='.jpg,.jpeg,.png,.gif,.tiff,.tif,.webp'
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
                       onChange(e.target.files[0]);

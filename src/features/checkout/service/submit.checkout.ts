@@ -1,7 +1,7 @@
 import apiProxy from '@/src/lib/api-proxy';
 
 export type CheckoutPayload = {
-  product_id: string;
+  product_sku: string;
   request_size: string;
   color: string;
   logo: string;

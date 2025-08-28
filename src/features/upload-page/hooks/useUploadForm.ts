@@ -9,24 +9,34 @@ export const useUploadForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const loadingRef = useRef(false);
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
 
   return {
     isLoading,
 
-    async submit(data: FormValues, pinCode: string) {
+    async submit({
+      callbackSuccess,
+      data,
+      pinCode,
+    }: {
+      data: FormValues;
+      pinCode: string;
+      callbackSuccess: () => void;
+    }) {
       if (loadingRef.current) return;
       loadingRef.current = true;
       setIsLoading(true);
       try {
         await submitUploadForm({ data, pinCode });
 
-        if (!user) {
-          setUser({ name: data.name, email: data.email });
-        }
+        setUser({
+          name: data.name,
+          email: data.email,
+          isUploaded: 1,
+        });
 
         toast.success('Your video has been submitted successfully!');
+        callbackSuccess?.();
         setTimeout(() => {
           router.push('/landing');
         }, 1000);

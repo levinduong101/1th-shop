@@ -37,31 +37,38 @@ export const useCheckout = () => {
       setIsLoading(true);
 
       try {
-        const upload = await uploadImage(productStore.file);
+        const upload: any = await uploadImage(productStore.file);
+
+        if (!upload?.url) {
+          throw new Error('Image upload failed. Please try again.');
+        }
 
         const payload: CheckoutPayload = {
-          product_id: SKU,
+          product_sku: SKU,
           restaurant_name: data.restaurantName,
           request_size: productStore?.size || '',
           color: productStore?.color || '',
-          logo: upload?.[0] || '',
+          logo: upload?.url || '',
           employee_id: pinCode,
           email: data.email,
           phone: data.phone,
-          street: data.street + (data.building ? `, ${data.building}` : ''),
+          street: data.building + (data.street ? `, ${data.street}` : ''),
           city: data.district || '',
         };
         const res = await submitCheckout(payload);
         if (res?.errors) {
           throw new Error(
-            res.errors[0]?.message || 'An error occurred while submitting your order.',
+            res.errors[0]?.extensions?.debugMessage ||
+              res.errors[0]?.message ||
+              'An error occurred while submitting your order.',
           );
         }
 
-        if (!user) {
+        if (!user?.name || !user?.email) {
           setUser({
             email: data.email,
             name: data.restaurantName,
+            isUploaded: 0,
           });
         }
 
@@ -70,7 +77,9 @@ export const useCheckout = () => {
         setFormProduct(null);
         setTimeout(() => {
           router.push('/confirm');
-        }, 1000);
+        }, 500);
+      } catch (error: any) {
+        toast.error(error?.message || 'An unexpected error occurred. Please try again.');
       } finally {
         loadingRef.current = false;
         setIsLoading(false);
