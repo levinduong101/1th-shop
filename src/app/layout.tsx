@@ -2,6 +2,7 @@ import { JSX } from 'react';
 import './globals.css';
 import { Metadata } from 'next';
 import { ToastContainer } from 'react-toastify';
+import CheckAuth from '../components/shared/CheckAuth';
 
 export const metadata: Metadata = {
   title: 'Coca-Cola × Chefs in Town',
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: Readonly<Props>): JSX.Element {
           draggable
           theme='light'
         />
-
+        <CheckAuth />
         {children}
       </body>
     </html>
