@@ -7,13 +7,14 @@ interface CheckoutState {
   clearForm: () => void;
 }
 
-const initValue = {
+const initValue: CheckoutFormValues = {
   email: '',
   phone: '',
   restaurantName: '',
   street: '',
   building: '',
   district: '',
+  postcode: '',
 };
 
 export const useCheckoutStore = create<CheckoutState>((set) => ({
