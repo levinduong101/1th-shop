@@ -1,4 +1,4 @@
-import { apiGraphQL } from '@/src/lib/api-graphql';
+import { apiGraphQLServer } from '@/src/lib/api-graphql-server';
 
 const PRODUCT_QUERY = `
 query Products($sku: String!) {
@@ -126,7 +126,7 @@ interface ProductResponse {
 }
 
 export async function getProduct(sku: string): Promise<Product | null> {
-  const data = await apiGraphQL<ProductResponse>(PRODUCT_QUERY, { sku }, { revalidate: 60 });
+  const data = await apiGraphQLServer<ProductResponse>(PRODUCT_QUERY, { sku }, { revalidate: 60 });
 
   return data?.products?.items?.[0] ?? null;
 }

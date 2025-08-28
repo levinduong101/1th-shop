@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Button } from '@/src/components/ui/Button';
 import {
   Dialog,
@@ -8,13 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/src/components/ui/dialog';
-import { Search } from 'lucide-react';
+import { LoaderCircle, Search } from 'lucide-react';
 import Input from '@/src/components/ui/Input';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCheckoutStore } from '@/src/store/checkoutStore';
 import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/src/hooks/useAuth';
+import { useAuthStore } from '@/src/store/authStore';
 
 const schema = z.object({
   pinCode: z.string().min(1, 'PIN Code is required'),
@@ -23,12 +24,10 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function Popup() {
-  const setPinCode = useCheckoutStore((state) => state.setPinCode);
-  const checkoutStore = useCheckoutStore((state) => state.formStore);
-  const [open, setOpen] = useState(Boolean(!checkoutStore?.pinCode));
+  const pinCodeStore = useAuthStore((state) => state.pinCode);
   const searchParams = useSearchParams();
-
   const pinCodeParam = useMemo(() => searchParams.get('pin'), [searchParams]);
+  const { auth, isLoading } = useAuth();
 
   const {
     register,
@@ -52,14 +51,11 @@ export default function Popup() {
 
   /** Handle submit */
   const onSubmit = (data: FormData) => {
-    // eslint-disable-next-line no-console
-    console.log('Submitted PIN Code:', data.pinCode);
-    setPinCode(data.pinCode);
-    setOpen(false);
+    auth(data.pinCode);
   };
 
   return (
-    <Dialog open={open}>
+    <Dialog open={!Boolean(pinCodeStore)}>
       <DialogContent className='sm:max-w-[425px]' showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>PIN Code</DialogTitle>
@@ -80,8 +76,9 @@ export default function Popup() {
             className='!font-ccep !h-12.5 !text-base'
             animation='scaleIn'
             iconAnimation={<Search size={20} />}
+            disabled={isLoading}
           >
-            Check PIN Code
+            {isLoading ? <LoaderCircle className='mx-auto h-7 animate-spin' /> : 'Check PIN Code'}
           </Button>
         </form>
       </DialogContent>

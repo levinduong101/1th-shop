@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const europeanPhoneRegex = /^(\+?\d{1,4}[\s-]?)?(\(?\d{2,4}\)?[\s-]?)?[\d\s-]{5,}$/;
+const europeanPhoneRegex = /^\+?\d{8,20}$/;
 
 export const checkoutSchema = z.object({
   email: z
@@ -19,7 +19,6 @@ export const checkoutSchema = z.object({
   street: z.string().min(1, { message: 'Street is required' }),
   building: z.string().optional(),
   district: z.string().optional(),
-  pinCode: z.string().min(1, { message: 'Pin code is required' }),
 });
 
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>;

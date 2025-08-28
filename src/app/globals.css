@@ -275,3 +275,7 @@ body {
     @apply font-semibold text-xl
   }
 }
+
+input:disabled {
+  @apply bg-gray
+}

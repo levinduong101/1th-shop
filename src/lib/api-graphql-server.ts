@@ -1,4 +1,4 @@
-const API_URL = process.env.API_URL || 'https://merch-base.prowerb.digital';
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://merch-base.prowerb.digital';
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || '';
 
 interface GraphQLResponse<T> {
@@ -6,7 +6,7 @@ interface GraphQLResponse<T> {
   errors?: { message: string }[];
 }
 
-export async function apiGraphQL<T>(
+export async function apiGraphQLServer<T>(
   query: string,
   variables: Record<string, any> = {},
   options?: { revalidate?: number },

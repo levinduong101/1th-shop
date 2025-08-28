@@ -1,4 +1,4 @@
-import apiProxy from '@/src/lib/api-proxy';
+import apiProxyUpload from '@/src/lib/api-proxy-upload';
 import { FormValues } from '../lib/schema';
 
 export const submitUploadForm = async ({
@@ -25,7 +25,7 @@ export const submitUploadForm = async ({
       }
     });
 
-    const res = await apiProxy.post('/video/upload', formData, {
+    const res = await apiProxyUpload.post('/rest/V1/video/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
