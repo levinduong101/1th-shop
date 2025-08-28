@@ -68,7 +68,7 @@ export const useCheckout = () => {
           setUser({
             email: data.email,
             name: data.restaurantName,
-            isUploaded: 0,
+            isUploaded: null,
           });
         }
 

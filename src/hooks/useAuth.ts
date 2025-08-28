@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 export type User = {
   name: string;
   email: string;
-  isUploaded: 0 | 1;
+  isUploaded: '1' | null;
 };
 
 export type AuthResponse = {

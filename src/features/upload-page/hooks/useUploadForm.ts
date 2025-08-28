@@ -32,7 +32,7 @@ export const useUploadForm = () => {
         setUser({
           name: data.name,
           email: data.email,
-          isUploaded: 1,
+          isUploaded: '1',
         });
 
         toast.success('Your video has been submitted successfully!');
