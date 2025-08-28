@@ -6,27 +6,20 @@ import { useEffect, useState } from 'react';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const pinCode = useAuthStore((state) => state.pinCode);
-  const [hydrated, setHydrated] = useState(false);
+  const hasHydrated = useAuthStore((state) => state._hasHydrated);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('Hydrating...');
-    useAuthStore.persist.onFinishHydration(() => {
-      // eslint-disable-next-line no-console
-      console.log('Hydrated', useAuthStore.getState().pinCode);
-      setHydrated(true);
-    });
+    setIsClient(true);
   }, []);
 
-  if (!hydrated) {
-    // eslint-disable-next-line no-console
-    console.log('Not hydrated yet', hydrated);
-    return null;
+  // Chờ hydration hoàn tất và chỉ chạy trên client
+  if (!isClient || !hasHydrated) {
+    return <div>Loading...</div>; // Hoặc loading spinner
   }
 
+  // Sau khi hydrate, check pinCode
   if (!pinCode) {
-    // eslint-disable-next-line no-console
-    console.log('No pin code found, redirecting to /landing', pinCode);
     redirect('/landing');
   }
 

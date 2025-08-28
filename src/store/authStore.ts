@@ -7,6 +7,9 @@ interface AuthState {
   setPinCode: (pinCode: string | null) => void;
   user: User | null;
   setUser: (user: User | null) => void;
+  // Thêm flag để track việc hydrate
+  _hasHydrated: boolean;
+  setHasHydrated: (hasHydrated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -19,6 +22,10 @@ export const useAuthStore = create<AuthState>()(
       // User
       user: null,
       setUser: (user) => set({ user }),
+
+      // Hydration tracking
+      _hasHydrated: false,
+      setHasHydrated: (hasHydrated) => set({ _hasHydrated: hasHydrated }),
     }),
     {
       name: 'auth-storage',
@@ -26,6 +33,9 @@ export const useAuthStore = create<AuthState>()(
         pinCode: state.pinCode,
         user: state.user,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     },
   ),
 );
