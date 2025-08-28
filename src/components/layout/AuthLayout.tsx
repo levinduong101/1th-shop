@@ -19,6 +19,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   }
 
   if (!pinCode) {
+    // eslint-disable-next-line no-console
     console.log('No pin code found, redirecting to /landing', pinCode);
     redirect('/landing');
   }
