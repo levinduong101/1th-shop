@@ -54,6 +54,7 @@ export const useCheckout = () => {
           phone: data.phone,
           street: data.building + (data.street ? `, ${data.street}` : ''),
           city: data.district || '',
+          postcode: data.postcode?.toString() || '',
         };
         const res = await submitCheckout(payload);
         if (res?.errors) {
@@ -73,11 +74,13 @@ export const useCheckout = () => {
         }
 
         toast.success('Your order has been placed successfully!');
-        clearForm();
-        setFormProduct(null);
         setTimeout(() => {
           router.push('/confirm');
         }, 500);
+        setTimeout(() => {
+          clearForm();
+          setFormProduct(null);
+        }, 1000);
       } catch (error: any) {
         toast.error(error?.message || 'An unexpected error occurred. Please try again.');
       } finally {

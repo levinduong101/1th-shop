@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   // Wait until hydrated
   if (!isClient || !hasHydrated) {
     return (
-      <div className='fixed inset-0 flex items-center justify-center bg-black/20'>
+      <div className='fixed inset-0 flex items-center justify-center bg-black/10'>
         <LoaderCircle className='mx-auto h-10 animate-spin' />
       </div>
     );

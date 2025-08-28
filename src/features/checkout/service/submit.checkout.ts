@@ -11,6 +11,7 @@ export type CheckoutPayload = {
   phone: string;
   street: string;
   city: string;
+  postcode: string;
 };
 
 export const submitCheckout = async (data: CheckoutPayload) => {
