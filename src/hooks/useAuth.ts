@@ -19,7 +19,7 @@ export type AuthResponse = {
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const loadingRef = useRef(false);
-  const { pinCode: pinCodeStore, setPinCode, setUser } = useAuthStore();
+  const { pinCode: pinCodeStore, setPinCode, setUser, clearAll } = useAuthStore();
 
   return {
     isLoading,
@@ -49,6 +49,7 @@ export const useAuth = () => {
         if (user) setUser({ video: null, ...user });
       } catch (error: any) {
         toast.error(error?.message || 'Authentication failed. Please try again.');
+        clearAll();
       } finally {
         loadingRef.current = false;
         setIsLoading(false);

@@ -8,12 +8,13 @@ import { toast } from 'react-toastify';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const isValidPinCode = useAuthStore((state) => state.isValidPinCode);
+  const pinCode = useAuthStore((state) => state.pinCode);
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+  }, [pinCode]);
 
   // Wait until hydrated
   if (!isClient || !hasHydrated) {

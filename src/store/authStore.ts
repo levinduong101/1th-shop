@@ -13,6 +13,8 @@ interface AuthState {
   setHasHydrated: (hasHydrated: boolean) => void;
   // Helper to check if pinCode is still valid
   isValidPinCode: () => boolean;
+  // Clear everything on logout
+  clearAll: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,12 +25,12 @@ export const useAuthStore = create<AuthState>()(
       pinCodeExpiry: null,
       setPinCode: (pinCode) => {
         if (pinCode) {
-          // Set expiry time 24h from now
+          // Set expire time 24h from now
           const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
           set({ pinCode, pinCodeExpiry: expiry });
         } else {
           // Clear pinCode and expiry
-          set({ pinCode: null, pinCodeExpiry: null, user: null });
+          get().clearAll();
         }
       },
 
@@ -47,11 +49,19 @@ export const useAuthStore = create<AuthState>()(
 
         const isExpired = Date.now() > pinCodeExpiry;
         if (isExpired) {
-          // Automatically remove expired pinCode
-          set({ pinCode: null, pinCodeExpiry: null, user: null });
+          get().clearAll();
           return false;
         }
         return true;
+      },
+
+      // Clear all data on logout
+      clearAll: () => {
+        set({
+          pinCode: null,
+          pinCodeExpiry: null,
+          user: null,
+        });
       },
     }),
     {
@@ -66,9 +76,7 @@ export const useAuthStore = create<AuthState>()(
         if (state && state.pinCode && state.pinCodeExpiry) {
           const isExpired = Date.now() > state.pinCodeExpiry;
           if (isExpired) {
-            state.pinCode = null;
-            state.pinCodeExpiry = null;
-            state.user = null;
+            state.clearAll();
           }
         }
         state?.setHasHydrated(true);
