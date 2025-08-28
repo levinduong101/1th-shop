@@ -18,7 +18,13 @@ export const checkoutSchema = z.object({
   restaurantName: z.string().min(1, { message: 'Restaurant name is required' }),
   street: z.string().min(1, { message: 'Street is required' }),
   building: z.string().optional(),
-  district: z.string().optional(),
+  district: z.string().min(1, { message: 'District is required' }),
+  postcode: z
+    .string('Postcode is required')
+    .min(1, { message: 'Postcode is required' })
+    .refine((val) => /^[A-Za-z0-9]{2,10}$/.test(val), {
+      message: 'Postcode must be between 2 and 10 digits',
+    }),
 });
 
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>;

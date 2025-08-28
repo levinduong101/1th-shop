@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
       phone,
       street,
       city,
+      postcode,
     } = body;
 
     // Build GraphQL mutation dynamically
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
           phone: "${phone}",
           street: "${street}",
           city: "${city}",
+          postcode: "${postcode}"
         ) {
           personalizehoodieorder_id
           product_sku
@@ -47,6 +49,7 @@ export async function POST(req: NextRequest) {
           phone
           street
           city
+          postcode
         }
       }
     `;

@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, LoaderCircle, Pen } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { CheckoutFormValues, checkoutSchema } from './lib/schema';
 import { useEffect, useState } from 'react';
@@ -28,14 +28,6 @@ export default function CheckoutView() {
   const pinCode = useAuthStore((state) => state.pinCode);
   const user = useAuthStore((state) => state.user);
 
-  /** Check if not select variant */
-  useEffect(() => {
-    if (!productStore) {
-      toast.error('Please design your product first!');
-      redirect('/design-product');
-    }
-  }, [productStore]);
-
   /** Use form */
   const {
     handleSubmit,
@@ -43,6 +35,7 @@ export default function CheckoutView() {
     formState: { errors },
     watch,
     setValue,
+    setError,
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: checkoutStore || {
@@ -52,6 +45,7 @@ export default function CheckoutView() {
       street: '',
       building: '',
       district: '',
+      postcode: undefined,
     },
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -144,7 +138,7 @@ export default function CheckoutView() {
                 <Input
                   label='Phone number'
                   required
-                  placeholder='+48'
+                  placeholder='+1 212 555 1234'
                   {...register('phone')}
                   onChange={(e) => {
                     let value = e.target.value;
@@ -158,6 +152,7 @@ export default function CheckoutView() {
 
                     value = value.slice(0, 21);
                     setValue('phone', value);
+                    setError('phone', { message: '', type: 'manual' });
                   }}
                   className='border-2 font-light'
                   error={errors.phone?.message}
@@ -199,10 +194,19 @@ export default function CheckoutView() {
                 />
                 <Input
                   label='District / Area'
+                  required
                   placeholder='e.g. City Center'
                   {...register('district')}
                   className='border-2 font-light'
                   error={errors.district?.message}
+                />
+                <Input
+                  label='Postcode'
+                  required
+                  placeholder='123456'
+                  {...register('postcode')}
+                  className='border-2 font-light'
+                  error={errors.postcode?.message}
                 />
               </div>
             </div>
@@ -224,22 +228,33 @@ export default function CheckoutView() {
                     className='h-30 w-30 shrink-0 object-contain'
                   />
 
-                  <div className='flex flex-col justify-between gap-5'>
-                    <div>
-                      <p className='text-sm font-normal lg:text-xl'>Coca-Cola Classic Hoodie</p>
-                      <div className='mt-2 flex items-center gap-1.5'>
-                        {productStore?.color && (
-                          <div
-                            className={clsx(
-                              'grid aspect-square h-9 shrink-0 place-items-center rounded-full border-2',
-                              getColorClass(productStore?.color),
-                            )}
-                          />
-                        )}
-                        <div className='bg-gray grid aspect-square w-9 shrink-0 place-items-center rounded-full text-sm'>
-                          {productStore?.size || 'L'}
-                        </div>
+                  <div className='grid grid-cols-[max-content_1fr] gap-3'>
+                    <p className='col-span-full text-sm font-normal lg:text-xl'>
+                      Coca-Cola Classic Hoodie
+                    </p>
+
+                    <div className='mt-2 flex items-center gap-1.5'>
+                      {productStore?.color && (
+                        <div
+                          className={clsx(
+                            'grid aspect-square h-9 shrink-0 place-items-center rounded-full border-2',
+                            getColorClass(productStore?.color),
+                          )}
+                        />
+                      )}
+                      <div className='bg-gray grid aspect-square w-9 shrink-0 place-items-center rounded-full text-sm'>
+                        {productStore?.size || 'L'}
                       </div>
+                    </div>
+
+                    <div className='row-span-2'>
+                      <Image
+                        src={URL.createObjectURL(productStore?.file)}
+                        width={80}
+                        height={80}
+                        alt='Design Image'
+                        className='h-20 w-20 border object-contain p-1'
+                      />
                     </div>
 
                     <button
