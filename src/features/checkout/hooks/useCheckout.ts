@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { CheckoutPayload, submitCheckout } from '../service/submit.checkout';
 import { useRouter } from 'next/navigation';
-import { useCheckoutStore } from '@/src/store/checkoutStore';
 import { useProductStore } from '@/src/store/productStore';
 import { CheckoutFormValues } from '../lib/schema';
 import { uploadImage } from '../service/upload.image';
@@ -14,8 +13,7 @@ export const useCheckout = () => {
   const [isLoading, setIsLoading] = useState(false);
   const loadingRef = useRef(false);
   const router = useRouter();
-  const clearForm = useCheckoutStore((state) => state.clearForm);
-  const { formStore: productStore, setFormStore: setFormProduct } = useProductStore();
+  const { formStore: productStore } = useProductStore();
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
 
@@ -77,10 +75,6 @@ export const useCheckout = () => {
         setTimeout(() => {
           router.push('/confirm');
         }, 500);
-        setTimeout(() => {
-          clearForm();
-          setFormProduct(null);
-        }, 1000);
       } catch (error: any) {
         toast.error(error?.message || 'An unexpected error occurred. Please try again.');
       } finally {
