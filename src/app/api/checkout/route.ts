@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const {
-      product_id,
+      product_sku,
       request_size,
       color,
       logo,
@@ -23,35 +23,33 @@ export async function POST(req: NextRequest) {
 
     // Build GraphQL mutation dynamically
     const mutation = `
-          mutation {
-            createPersonalizeHoodieOrder(
-              product_id: "${product_id}",
-              request_size: "${request_size}",
-              color: "${color}",
-              logo: "${logo}",
-              employee_id: "${employee_id}",
-              restaurant_name: "${restaurant_name}",
-              email: "${email}",
-              phone: "${phone}",
-              street: "${street}",
-              city: "${city}",
-            ) {
-              personalizehoodieorder_id
-              product_id
-              request_size
-              color
-              logo
-              employee_id
-              restaurant_name
-              email
-              phone
-              street
-              city
-              creation_time
-              status
-            }
-          }
-        `;
+      mutation {
+        createPersonalizeHoodieOrder(
+          product_sku: "${product_sku}",
+          request_size: "${request_size}",
+          color: "${color}",
+          logo: "${logo}",
+          employee_id: "${employee_id}",
+          restaurant_name: "${restaurant_name}",
+          email: "${email}",
+          phone: "${phone}",
+          street: "${street}",
+          city: "${city}",
+        ) {
+          personalizehoodieorder_id
+          product_sku
+          request_size
+          color
+          restaurant_name
+          logo
+          employee_id
+          email
+          phone
+          street
+          city
+        }
+      }
+    `;
 
     const response = await axios.post(
       `${GRAPHQL_URL}/graphql`,

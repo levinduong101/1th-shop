@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { User } from '../hooks/useAuth';
 
 interface AuthState {
@@ -8,12 +9,23 @@ interface AuthState {
   setUser: (user: User | null) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  // Pincode
-  pinCode: null,
-  setPinCode: (pinCode: string | null) => set({ pinCode }),
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      // Pincode
+      pinCode: null,
+      setPinCode: (pinCode) => set({ pinCode }),
 
-  // User
-  user: null,
-  setUser: (user: User | null) => set({ user }),
-}));
+      // User
+      user: null,
+      setUser: (user) => set({ user }),
+    }),
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({
+        pinCode: state.pinCode,
+        user: state.user,
+      }),
+    },
+  ),
+);

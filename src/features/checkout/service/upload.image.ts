@@ -11,7 +11,7 @@ export const uploadImage = async (file: File) => {
       },
     });
 
-    return res.data;
+    return res;
   } catch (error: any) {
     // eslint-disable-next-line no-console
     console.error('Upload error:', error);

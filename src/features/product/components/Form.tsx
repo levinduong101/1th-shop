@@ -27,19 +27,31 @@ export default function Form({ product }: { product: Product | null }) {
   /** Get data from zustand */
   const { formStore, setFormStore } = useProductStore();
 
-  const OPTIONS: Option[] = useMemo(() => {
-    return (
-      product?.options
-        ?.sort((a, b) => a.sort_order - b.sort_order)
-        .map((option) => {
-          return {
-            title: option.title,
-            values: option.value?.map((v) => v.title?.toUpperCase()) || [],
-            type: option.__typename as OptionType,
-          };
-        }) || []
-    );
-  }, [product]);
+  /** Handle Options */
+  const { OPTIONS, colorMapImage }: { OPTIONS: Option[]; colorMapImage: Map<string, string> } =
+    useMemo(() => {
+      const options =
+        product?.options
+          ?.sort((a, b) => a.sort_order - b.sort_order)
+          .map((option) => {
+            return {
+              title: option.title,
+              values: option.value?.map((v) => v.title?.toUpperCase()) || [],
+              type: option.__typename as OptionType,
+            };
+          }) || [];
+
+      const colorMapImage = new Map();
+
+      product?.media_gallery?.forEach((media) => {
+        colorMapImage.set(media?.label?.toUpperCase(), media.url);
+      });
+
+      return {
+        OPTIONS: options,
+        colorMapImage,
+      };
+    }, [product]);
 
   /** Init form-hook */
   const {
@@ -48,22 +60,27 @@ export default function Form({ product }: { product: Product | null }) {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<ProductFormValues>({
     resolver: zodResolver(ProductFormSchema),
   });
 
   /** Set default values */
   useEffect(() => {
+    const initColor =
+      OPTIONS?.find((opt) => opt.title.toLowerCase().includes('color'))?.values?.[0] || '';
+    const initImage = initColor ? colorMapImage.get(initColor) : '';
+
     reset(
       formStore || {
-        productName: product?.name || '',
+        selectedImage: initImage || '',
         size: OPTIONS?.find((opt) => opt.title.toLowerCase().includes('size'))?.values?.[0] || '',
-        color: OPTIONS?.find((opt) => opt.title.toLowerCase().includes('color'))?.values?.[0] || '',
+        color: initColor,
         file: null as unknown as File,
       },
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reset, OPTIONS]);
+  }, [reset, OPTIONS, colorMapImage]);
 
   const selectedSize = watch('size');
   const selectedFile = watch('file');
@@ -222,6 +239,8 @@ export default function Form({ product }: { product: Product | null }) {
                           )}
                           onClick={() => {
                             field.onChange(color);
+                            const newImage = colorMapImage.get(color) || '';
+                            setValue('selectedImage', newImage);
                           }}
                         />
                       ))}
@@ -260,7 +279,7 @@ export default function Form({ product }: { product: Product | null }) {
       </Button>
 
       <DialogCustom
-        imageUrl={product?.image?.url || '/images/product-page/product.png'}
+        imageUrl={watch('selectedImage') || '/images/product-page/product.png'}
         open={openDialog}
         setOpen={setOpenDialog}
         control={control}
