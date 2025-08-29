@@ -16,6 +16,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 import { Button } from '@/src/components/ui/Button';
 import { MediaGalleryItem } from '../service/get.product';
+import { useSelectedColor } from '@/src/store/selectedColorStore';
 
 type SlideImageProps = {
   images: MediaGalleryItem[];
@@ -26,6 +27,7 @@ export default function SlideImage({ images }: SlideImageProps) {
   const [index, setIndex] = useState(0);
   const [swiper, setSwiper] = useState<SwiperType>();
   const [activeIndex, setActiveIndex] = useState(0);
+  const selectedColor = useSelectedColor((state) => state.selectedColor);
 
   const thumbRefs = useRef<(HTMLImageElement | null)[]>([]);
 
@@ -38,6 +40,19 @@ export default function SlideImage({ images }: SlideImageProps) {
       });
     }
   }, [activeIndex]);
+
+  useEffect(() => {
+    if (selectedColor) {
+      const colorIndex = images.findIndex(
+        (img) => img.label?.toUpperCase() === selectedColor.toLocaleUpperCase(),
+      );
+      if (colorIndex !== -1) {
+        swiper?.slideTo(colorIndex);
+        setActiveIndex(colorIndex);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedColor, swiper]);
 
   return (
     <>

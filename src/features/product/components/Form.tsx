@@ -14,6 +14,7 @@ import Image from 'next/image';
 import { useProductStore } from '@/src/store/productStore';
 import { useRouter } from 'next/navigation';
 import { Product } from '../service/get.product';
+import { useSelectedColor } from '@/src/store/selectedColorStore';
 
 type OptionType = 'CustomizableDropDownOption' | 'CustomizableFieldOption';
 
@@ -40,6 +41,7 @@ const MEASUREMENT_LABELS = [
 export default function Form({ product }: { product: Product | null }) {
   /** Get data from zustand */
   const { formStore, setFormStore } = useProductStore();
+  const setSelectedColor = useSelectedColor((state) => state.setSelectedColor);
 
   /** Handle Options */
   const { OPTIONS, colorMapImage }: { OPTIONS: Option[]; colorMapImage: Map<string, string> } =
@@ -271,6 +273,7 @@ export default function Form({ product }: { product: Product | null }) {
                             )}
                             onClick={() => {
                               field.onChange(color);
+                              setSelectedColor(color.label.toLocaleLowerCase());
                               const newImage = colorMapImage.get(color.label) || '';
                               setValue('selectedImage', newImage);
                             }}
