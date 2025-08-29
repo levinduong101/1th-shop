@@ -11,10 +11,12 @@ import 'swiper/css/thumbs';
 
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 import { Button } from '@/src/components/ui/Button';
 import { MediaGalleryItem } from '../service/get.product';
+import { useSelectedColor } from '@/src/store/selectedColorStore';
 
 type SlideImageProps = {
   images: MediaGalleryItem[];
@@ -25,6 +27,7 @@ export default function SlideImage({ images }: SlideImageProps) {
   const [index, setIndex] = useState(0);
   const [swiper, setSwiper] = useState<SwiperType>();
   const [activeIndex, setActiveIndex] = useState(0);
+  const selectedColor = useSelectedColor((state) => state.selectedColor);
 
   const thumbRefs = useRef<(HTMLImageElement | null)[]>([]);
 
@@ -37,6 +40,19 @@ export default function SlideImage({ images }: SlideImageProps) {
       });
     }
   }, [activeIndex]);
+
+  useEffect(() => {
+    if (selectedColor) {
+      const colorIndex = images.findIndex(
+        (img) => img.label?.toUpperCase() === selectedColor.toLocaleUpperCase(),
+      );
+      if (colorIndex !== -1) {
+        swiper?.slideTo(colorIndex);
+        setActiveIndex(colorIndex);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedColor, swiper]);
 
   return (
     <>
@@ -69,7 +85,7 @@ export default function SlideImage({ images }: SlideImageProps) {
                   alt={`Slide ${i}`}
                   width={600}
                   height={600}
-                  className='max-h-[665px] object-contain p-2'
+                  className='max-h-[665px] object-contain p-10'
                 />
               </div>
             </SwiperSlide>
@@ -139,6 +155,15 @@ export default function SlideImage({ images }: SlideImageProps) {
         close={() => setOpen(false)}
         index={index}
         slides={images.map((img) => ({ src: img.url }))}
+        plugins={[Zoom]}
+        zoom={{
+          maxZoomPixelRatio: 3,
+          zoomInMultiplier: 2,
+          doubleTapDelay: 300,
+          doubleClickDelay: 300,
+          keyboardMoveDistance: 50,
+          wheelZoomDistanceFactor: 100,
+        }}
       />
     </>
   );

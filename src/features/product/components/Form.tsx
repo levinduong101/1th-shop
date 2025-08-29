@@ -14,18 +14,34 @@ import Image from 'next/image';
 import { useProductStore } from '@/src/store/productStore';
 import { useRouter } from 'next/navigation';
 import { Product } from '../service/get.product';
+import { useSelectedColor } from '@/src/store/selectedColorStore';
 
 type OptionType = 'CustomizableDropDownOption' | 'CustomizableFieldOption';
 
+type ValueItem = {
+  key: string;
+  label: string;
+};
+
 type Option = {
   title: string;
-  values?: string[];
+  values?: ValueItem[];
   type: OptionType;
 };
+
+const MEASUREMENT_LABELS = [
+  { key: 'frontLength', label: 'Front length from HSP' },
+  { key: 'chestWidth', label: '1/2 chest width' },
+  { key: 'waistWidth', label: '1/2 waist width /waistband width' },
+  { key: 'hemWidth', label: '1/2 hem width' },
+  { key: 'sleeveLength', label: 'Sleeve length from shoulder (set in)' },
+  { key: 'hoodHeight', label: 'Hood height' },
+];
 
 export default function Form({ product }: { product: Product | null }) {
   /** Get data from zustand */
   const { formStore, setFormStore } = useProductStore();
+  const setSelectedColor = useSelectedColor((state) => state.setSelectedColor);
 
   /** Handle Options */
   const { OPTIONS, colorMapImage }: { OPTIONS: Option[]; colorMapImage: Map<string, string> } =
@@ -36,7 +52,11 @@ export default function Form({ product }: { product: Product | null }) {
           .map((option) => {
             return {
               title: option.title,
-              values: option.value?.map((v) => v.title?.toUpperCase()) || [],
+              values:
+                option.value?.map((v) => ({
+                  key: v.option_type_id.toString(),
+                  label: v.title?.toUpperCase() || '',
+                })) || [],
               type: option.__typename as OptionType,
             };
           }) || [];
@@ -67,15 +87,18 @@ export default function Form({ product }: { product: Product | null }) {
 
   /** Set default values */
   useEffect(() => {
-    const initColor =
-      OPTIONS?.find((opt) => opt.title.toLowerCase().includes('color'))?.values?.[0] || '';
-    const initImage = initColor ? colorMapImage.get(initColor) : '';
+    const colorOption = OPTIONS?.find((opt) => opt.title.toLowerCase().includes('color'));
+    const sizeOption = OPTIONS?.find((opt) => opt.title.toLowerCase().includes('size'));
+
+    const initColor = colorOption?.values?.[0];
+    const initSize = sizeOption?.values?.[0];
+    const initImage = initColor?.label ? colorMapImage.get(initColor.label) : '';
 
     reset(
       formStore || {
         selectedImage: initImage || '',
-        size: OPTIONS?.find((opt) => opt.title.toLowerCase().includes('size'))?.values?.[0] || '',
-        color: initColor,
+        size: initSize || { key: '', label: '' },
+        color: initColor || { key: '', label: '' },
         file: null as unknown as File,
       },
     );
@@ -101,9 +124,9 @@ export default function Form({ product }: { product: Product | null }) {
           <div className='flex w-full flex-col gap-3'>
             <h4 className='font-ccep-wide text-sm font-medium lg:text-xl'>{option?.title}</h4>
             <p className='text-sm font-light'>
-              We’re excited to help you create a hoodie that represents your brand! For the best
-              print quality, upload a high-resolution logo file (PNG, SVG, or JPG). Make sure it’s
-              clear, high contrast, and free of watermarks.
+              We&apos;re excited to help you create a hoodie that represents your brand! For the
+              best print quality, upload a high-resolution logo file (PNG, SVG, or JPG). Make sure
+              it&apos;s clear, high contrast, and free of watermarks.
             </p>
 
             <Button
@@ -152,7 +175,7 @@ export default function Form({ product }: { product: Product | null }) {
               <div className='flex w-full items-center justify-between text-sm'>
                 <div className='flex items-center gap-3 lg:gap-4'>
                   <span className='font-medium lg:text-xl'>Size</span>
-                  <span className='font-light'>{selectedSize}</span>
+                  <span className='font-light'>{selectedSize?.label || ''}</span>
                 </div>
 
                 <Popover>
@@ -164,28 +187,39 @@ export default function Form({ product }: { product: Product | null }) {
                   </PopoverTrigger>
 
                   <PopoverContent
-                    className='w-[300px] rounded-2xl p-4 shadow-lg'
+                    className='w-[350px] rounded-2xl p-4 shadow-lg md:w-100'
                     side='bottom'
                     align='end'
                   >
-                    <table className='w-full border-collapse text-sm'>
-                      <thead>
-                        <tr className='border-b'>
-                          <th className='py-1 text-left'>Size</th>
-                          <th className='py-1 text-left'>Chest</th>
-                          <th className='py-1 text-left'>Waist</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {SIZE_CHART.map((row, idx) => (
-                          <tr key={idx} className='border-b last:border-0'>
-                            <td className='py-1'>{row.eu}</td>
-                            <td className='py-1'>{row.chest}</td>
-                            <td className='py-1'>{row.waist}</td>
+                    <div className='overflow-x-auto'>
+                      <table className='w-full border-collapse text-xs'>
+                        <thead>
+                          <tr className='border-b'>
+                            <th className='px-1 py-2 text-left font-medium'>Measurements</th>
+                            {SIZE_CHART.map((sizeData) => (
+                              <th key={sizeData.size} className='px-1 py-2 text-center font-medium'>
+                                {sizeData.size}
+                              </th>
+                            ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {MEASUREMENT_LABELS.map((measurement, idx) => (
+                            <tr
+                              key={measurement.key}
+                              className={idx === MEASUREMENT_LABELS.length - 1 ? '' : 'border-b'}
+                            >
+                              <td className='px-1 py-1.5 text-left'>{measurement.label}</td>
+                              {SIZE_CHART.map((sizeData) => (
+                                <td key={sizeData.size} className='px-1 py-1.5 text-center'>
+                                  {sizeData[measurement.key as keyof typeof sizeData]}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </PopoverContent>
                 </Popover>
               </div>
@@ -202,11 +236,11 @@ export default function Form({ product }: { product: Product | null }) {
                           type='button'
                           className={clsx(
                             'border-gray bg-gray grid h-[35px] cursor-pointer place-items-center rounded-[40px] border-2 px-4 text-sm transition-colors duration-300 hover:bg-white',
-                            field.value === size && '!border-brown bg-white',
+                            field.value?.key === size.key && '!border-brown bg-white',
                           )}
                           onClick={() => field.onChange(size)}
                         >
-                          {size}
+                          {size.label}
                         </button>
                       ))}
                   </div>
@@ -228,22 +262,31 @@ export default function Form({ product }: { product: Product | null }) {
                 render={({ field }) => (
                   <div className='flex flex-wrap items-center gap-3'>
                     {option?.values &&
-                      option.values.map((color, index) => (
-                        <button
-                          key={index}
-                          type='button'
-                          className={clsx(
-                            'grid h-[35px] cursor-pointer place-items-center rounded-[40px] border-2 border-current px-4 text-sm transition-colors duration-300',
-                            field.value === color && '!border-brown',
-                            getColorClass(color),
-                          )}
-                          onClick={() => {
-                            field.onChange(color);
-                            const newImage = colorMapImage.get(color) || '';
-                            setValue('selectedImage', newImage);
-                          }}
-                        />
-                      ))}
+                      option.values.map((color, index) => {
+                        return (
+                          <button
+                            key={index}
+                            type='button'
+                            className={clsx(
+                              'relative grid aspect-square h-[35px] cursor-pointer place-items-center rounded-[40px] border-2 p-0.5 text-sm transition-colors duration-300',
+                              field.value?.key === color.key && '!border-brown',
+                            )}
+                            onClick={() => {
+                              field.onChange(color);
+                              setSelectedColor(color.label.toLocaleLowerCase());
+                              const newImage = colorMapImage.get(color.label) || '';
+                              setValue('selectedImage', newImage);
+                            }}
+                          >
+                            <div
+                              className={clsx(
+                                'h-full w-full rounded-full',
+                                getColorClass(color.label),
+                              )}
+                            />
+                          </button>
+                        );
+                      })}
                   </div>
                 )}
               />

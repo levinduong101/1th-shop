@@ -238,12 +238,12 @@ export default function CheckoutView() {
                         <div
                           className={clsx(
                             'grid aspect-square h-9 shrink-0 place-items-center rounded-full border-2',
-                            getColorClass(productStore?.color),
+                            getColorClass(productStore?.color?.label),
                           )}
                         />
                       )}
                       <div className='bg-gray grid aspect-square w-9 shrink-0 place-items-center rounded-full text-sm'>
-                        {productStore?.size || 'L'}
+                        {productStore?.size?.label || 'L'}
                       </div>
                     </div>
 

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const europeanPhoneRegex = /^\+?\d{8,20}$/;
+const europeanPhoneRegex = /^\+?\d{5,20}$/;
 
 export const checkoutSchema = z.object({
   email: z

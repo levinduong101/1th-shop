@@ -110,7 +110,7 @@ export default function DialogCustom({
                 <div
                   className={clsx(
                     // 'flex h-1/5 w-2/5  translate-y-[10%] flex-col gap-1 relative',
-                    'relative flex aspect-[566/300] w-2/5 translate-y-[10%] flex-col justify-center gap-1',
+                    'relative flex aspect-square w-2/5 -translate-y-[30%] flex-col justify-center gap-1',
                   )}
                 >
                   {file && (
