@@ -44,8 +44,8 @@ export const useCheckout = () => {
         const payload: CheckoutPayload = {
           product_sku: SKU,
           restaurant_name: data.restaurantName,
-          request_size: productStore?.size || '',
-          color: productStore?.color || '',
+          request_size: productStore?.size?.key || '',
+          color: productStore?.color?.key || '',
           logo: upload?.url || '',
           employee_id: pinCode,
           email: data.email,
