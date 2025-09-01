@@ -108,7 +108,7 @@ export default function CheckoutView() {
       return;
     }
 
-    submit({ data, pinCode, status: 5 });
+    submit({ data, pinCode, status: 5 }, onStoreData);
   };
 
   return (

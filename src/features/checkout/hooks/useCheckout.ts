@@ -20,15 +20,18 @@ export const useCheckout = () => {
   return {
     isLoading,
 
-    async submit({
-      data,
-      pinCode,
-      status,
-    }: {
-      data: CheckoutFormValues;
-      pinCode: string;
-      status: 1 | 5;
-    }) {
+    async submit(
+      {
+        data,
+        pinCode,
+        status,
+      }: {
+        data: CheckoutFormValues;
+        pinCode: string;
+        status: 1 | 5;
+      },
+      callbackSuccess?: () => void,
+    ) {
       if (loadingRef.current) return;
       if (!productStore?.file) {
         toast.error('Please upload a design image before submitting your order.');
@@ -88,6 +91,8 @@ export const useCheckout = () => {
               'An error occurred while submitting your order.',
           );
         }
+
+        if (callbackSuccess) callbackSuccess();
 
         const dataRes = res?.data?.createPersonalizeHoodieOrder;
 
