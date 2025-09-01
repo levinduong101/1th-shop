@@ -18,7 +18,11 @@ import { useAuth } from '@/src/hooks/useAuth';
 import { useAuthStore } from '@/src/store/authStore';
 
 const schema = z.object({
-  pinCode: z.string().min(1, 'PIN Code is required'),
+  pinCode: z
+    .string()
+    .min(4, 'PIN Code must be 4 characters')
+    .max(4, 'PIN Code must be 4 characters')
+    .regex(/^[a-zA-Z0-9]{4}$/, 'PIN Code must be 4 alphanumeric characters'),
   email: z.string().email('Invalid email'),
 });
 
