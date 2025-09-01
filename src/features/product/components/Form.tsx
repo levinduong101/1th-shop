@@ -15,6 +15,9 @@ import { useProductStore } from '@/src/store/productStore';
 import { useRouter } from 'next/navigation';
 import { Product } from '../service/get.product';
 import { useSelectedColor } from '@/src/store/selectedColorStore';
+import { useAuthStore } from '@/src/store/authStore';
+import { useAppyDraft } from '../hooks/useApplyDraft';
+import { LoaderCircle } from 'lucide-react';
 
 type OptionType = 'CustomizableDropDownOption' | 'CustomizableFieldOption';
 
@@ -42,36 +45,62 @@ export default function Form({ product }: { product: Product | null }) {
   /** Get data from zustand */
   const { formStore, setFormStore } = useProductStore();
   const setSelectedColor = useSelectedColor((state) => state.setSelectedColor);
+  const user = useAuthStore((state) => state.user);
+  const { applyDraftOrder, isLoading: getDraftLoading } = useAppyDraft();
 
   /** Handle Options */
-  const { OPTIONS, colorMapImage }: { OPTIONS: Option[]; colorMapImage: Map<string, string> } =
-    useMemo(() => {
-      const options =
-        product?.options
-          ?.sort((a, b) => a.sort_order - b.sort_order)
-          .map((option) => {
-            return {
-              title: option.title,
-              values:
-                option.value?.map((v) => ({
-                  key: v.option_type_id.toString(),
-                  label: v.title?.toUpperCase() || '',
-                })) || [],
-              type: option.__typename as OptionType,
-            };
-          }) || [];
+  const {
+    OPTIONS,
+    colorMapImageByLabel,
+    colorMapById,
+    sizeMapById,
+  }: {
+    OPTIONS: Option[];
+    colorMapImageByLabel: Map<string, string>;
+    colorMapById: Map<string, string>;
+    sizeMapById: Map<string, string>;
+  } = useMemo(() => {
+    const options =
+      product?.options
+        ?.sort((a, b) => a.sort_order - b.sort_order)
+        .map((option) => {
+          return {
+            title: option.title,
+            values:
+              option.value?.map((v) => ({
+                key: v.option_type_id.toString(),
+                label: v.title?.toUpperCase() || '',
+              })) || [],
+            type: option.__typename as OptionType,
+          };
+        }) || [];
 
-      const colorMapImage = new Map();
+    const colorMapImageByLabel = new Map();
+    product?.media_gallery?.forEach((media) => {
+      colorMapImageByLabel.set(media?.label?.toUpperCase(), media.url);
+    });
 
-      product?.media_gallery?.forEach((media) => {
-        colorMapImage.set(media?.label?.toUpperCase(), media.url);
+    const colorMapById = new Map();
+    product?.options
+      ?.find((opt) => opt.title.toLowerCase().includes('color'))
+      ?.value?.forEach((val) => {
+        colorMapById.set(val.option_type_id.toString(), val.title?.toUpperCase() || '');
       });
 
-      return {
-        OPTIONS: options,
-        colorMapImage,
-      };
-    }, [product]);
+    const sizeMapById = new Map();
+    product?.options
+      ?.find((opt) => opt.title.toLowerCase().includes('size'))
+      ?.value?.forEach((val) => {
+        sizeMapById.set(val.option_type_id.toString(), val.title?.toUpperCase() || '');
+      });
+
+    return {
+      OPTIONS: options,
+      colorMapImageByLabel,
+      colorMapById,
+      sizeMapById,
+    };
+  }, [product]);
 
   /** Init form-hook */
   const {
@@ -92,7 +121,7 @@ export default function Form({ product }: { product: Product | null }) {
 
     const initColor = colorOption?.values?.[0];
     const initSize = sizeOption?.values?.[0];
-    const initImage = initColor?.label ? colorMapImage.get(initColor.label) : '';
+    const initImage = initColor?.label ? colorMapImageByLabel.get(initColor.label) : '';
 
     reset(
       formStore || {
@@ -102,18 +131,36 @@ export default function Form({ product }: { product: Product | null }) {
         file: null as unknown as File,
       },
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reset, OPTIONS, colorMapImage]);
+  }, [reset, OPTIONS, colorMapImageByLabel, formStore]);
 
   const selectedSize = watch('size');
+  const selectedColor = watch('color');
   const selectedFile = watch('file');
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const router = useRouter();
 
+  /** Sync selected image - selected color */
+  useEffect(() => {
+    if (selectedColor?.label) {
+      const newImage = colorMapImageByLabel.get(selectedColor.label) || '';
+      setValue('selectedImage', newImage);
+      setSelectedColor(selectedColor.label.toUpperCase());
+    }
+  }, [selectedColor, setValue, colorMapImageByLabel, setSelectedColor]);
+
   /** Handle submit */
   const onSubmit = (data: ProductFormValues) => {
-    setFormStore(data);
+    setFormStore({ ...data, product_id: product?.id || 0 });
     router.push('/checkout');
+  };
+
+  /** Handle apply draft order */
+  const handleApplyDraftOrder = () => {
+    applyDraftOrder({
+      orderId: user?.personalize_draff || 0,
+      colorMapById,
+      sizeMapById,
+    });
   };
 
   /** Render options */
@@ -146,7 +193,11 @@ export default function Form({ product }: { product: Product | null }) {
               {selectedFile ? (
                 <>
                   <Image
-                    src={URL.createObjectURL(selectedFile)}
+                    src={
+                      typeof selectedFile === 'string'
+                        ? selectedFile
+                        : URL.createObjectURL(selectedFile)
+                    }
                     alt='preview'
                     className='absolute inset-0 h-full w-full object-contain p-5'
                     width={500}
@@ -273,9 +324,7 @@ export default function Form({ product }: { product: Product | null }) {
                             )}
                             onClick={() => {
                               field.onChange(color);
-                              setSelectedColor(color.label.toLocaleLowerCase());
-                              const newImage = colorMapImage.get(color.label) || '';
-                              setValue('selectedImage', newImage);
+                              setSelectedColor(color.label.toUpperCase());
                             }}
                           >
                             <div
@@ -299,36 +348,54 @@ export default function Form({ product }: { product: Product | null }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='flex w-full flex-col gap-4.5 lg:gap-7.5'>
-      {OPTIONS?.map((option, index) => (
-        <React.Fragment key={index}>
-          {renderOptions(option)}
-          <div className='h-[1px] w-full bg-[#F1F2F3]' />
-        </React.Fragment>
-      ))}
+    <>
+      {getDraftLoading && (
+        <div className='fixed inset-0 z-9999 grid place-items-center bg-black/20'>
+          <LoaderCircle className='text-red h-10 w-10 animate-spin' />
+        </div>
+      )}
 
-      <div className='h-[1px] w-full bg-[#F1F2F3]' />
+      <form onSubmit={handleSubmit(onSubmit)} className='flex w-full flex-col gap-4.5 lg:gap-7.5'>
+        <Button
+          type='button'
+          variant='white'
+          disabled={!Boolean(user?.personalize_draff)}
+          className='w-max !py-2 !text-sm hover:bg-gray-300'
+          onClick={handleApplyDraftOrder}
+        >
+          Use the draft order
+        </Button>
 
-      <Button
-        type='button'
-        variant='red'
-        fullWidth
-        className='h-11 lg:h-13'
-        animation='scaleIn'
-        disabled={!selectedFile}
-        onClick={() => setOpenDialog(true)}
-      >
-        CONTINUE
-      </Button>
+        {OPTIONS?.map((option, index) => (
+          <React.Fragment key={index}>
+            {renderOptions(option)}
+            <div className='h-[1px] w-full bg-[#F1F2F3]' />
+          </React.Fragment>
+        ))}
 
-      <DialogCustom
-        imageUrl={watch('selectedImage') || '/images/product-page/product.png'}
-        open={openDialog}
-        setOpen={setOpenDialog}
-        control={control}
-        file={selectedFile}
-        error={errors.file?.message}
-      />
-    </form>
+        <div className='h-[1px] w-full bg-[#F1F2F3]' />
+
+        <Button
+          type='button'
+          variant='red'
+          fullWidth
+          className='h-11 lg:h-13'
+          animation='scaleIn'
+          disabled={!selectedFile}
+          onClick={() => setOpenDialog(true)}
+        >
+          CONTINUE
+        </Button>
+
+        <DialogCustom
+          imageUrl={watch('selectedImage') || '/images/product-page/product.png'}
+          open={openDialog}
+          setOpen={setOpenDialog}
+          control={control}
+          file={selectedFile}
+          error={errors.file?.message}
+        />
+      </form>
+    </>
   );
 }

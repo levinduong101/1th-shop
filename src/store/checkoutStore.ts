@@ -12,7 +12,7 @@ const initValue: CheckoutFormValues = {
   phone: '',
   restaurantName: '',
   street: '',
-  building: '',
+  street2: '',
   district: '',
   postcode: '',
 };

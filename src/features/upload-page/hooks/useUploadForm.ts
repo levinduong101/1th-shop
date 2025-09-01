@@ -9,6 +9,7 @@ export const useUploadForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const loadingRef = useRef(false);
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
 
   return {
@@ -21,24 +22,25 @@ export const useUploadForm = () => {
     }: {
       data: FormValues;
       pinCode: string;
-      callbackSuccess: () => void;
+      callbackSuccess?: () => void;
     }) {
       if (loadingRef.current) return;
       loadingRef.current = true;
       setIsLoading(true);
       try {
-        await submitUploadForm({ data, pinCode });
+        const upload = await submitUploadForm({ data, pinCode });
 
         setUser({
-          name: data.name,
-          email: data.email,
-          video: '1',
+          ...user,
+          name: user?.name || data.name,
+          email: user?.email || data.email,
+          video_id: upload?.video_id || null,
         });
 
         toast.success('Your video has been submitted successfully!');
         callbackSuccess?.();
         setTimeout(() => {
-          router.push('/landing');
+          router.push('/');
         }, 1000);
       } finally {
         loadingRef.current = false;

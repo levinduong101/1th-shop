@@ -10,8 +10,13 @@ export type CheckoutPayload = {
   email: string;
   phone: string;
   street: string;
+  street2?: string;
   city: string;
   postcode: string;
+  personalizehoodieorder_id: number; // 0 -> if order is NEW, existed ID if order is draff
+  product_id: number;
+  status: 1 | 5; // 1 -> Pending, 5 -> Draff
+  customer_id: number;
 };
 
 export const submitCheckout = async (data: CheckoutPayload) => {

@@ -19,6 +19,7 @@ import { useAuthStore } from '@/src/store/authStore';
 
 const schema = z.object({
   pinCode: z.string().min(1, 'PIN Code is required'),
+  email: z.string().email('Invalid email'),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -39,6 +40,7 @@ export default function Popup() {
     mode: 'onChange',
     defaultValues: {
       pinCode: '',
+      email: '',
     },
   });
 
@@ -51,22 +53,36 @@ export default function Popup() {
 
   /** Handle submit */
   const onSubmit = (data: FormData) => {
-    auth(data.pinCode);
+    auth(data.pinCode, data.email);
   };
 
   return (
-    <Dialog open={!Boolean(pinCodeStore)}>
+    <Dialog open={!Boolean(pinCodeStore) || Boolean(pinCodeParam && pinCodeStore !== pinCodeParam)}>
       <DialogContent className='sm:max-w-[425px]' showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>PIN Code</DialogTitle>
-          <DialogDescription>Please enter the PIN code to access the content.</DialogDescription>
+          <DialogTitle>LOGIN</DialogTitle>
+          <DialogDescription>
+            Please enter the PIN code and email to access the content.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className='grid gap-4'>
           <Input
-            {...register('pinCode', { required: true })}
-            placeholder='Enter PIN Code'
+            placeholder='PIN code'
             className='!font-ccep'
             error={errors.pinCode?.message}
+            {...(pinCodeParam
+              ? {
+                  value: pinCodeParam,
+                  disabled: true,
+                }
+              : { ...register('pinCode', { required: true }) })}
+          />
+          <Input
+            {...register('email', { required: true })}
+            placeholder='Email'
+            className='!font-ccep'
+            error={errors.email?.message}
+            disabled={isLoading}
           />
 
           <Button
@@ -78,7 +94,7 @@ export default function Popup() {
             iconAnimation={<Search size={20} />}
             disabled={isLoading}
           >
-            {isLoading ? <LoaderCircle className='mx-auto h-7 animate-spin' /> : 'Check PIN Code'}
+            {isLoading ? <LoaderCircle className='mx-auto h-7 animate-spin' /> : 'Login'}
           </Button>
         </form>
       </DialogContent>

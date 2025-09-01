@@ -18,8 +18,13 @@ export async function POST(req: NextRequest) {
       email,
       phone,
       street,
+      street2,
       city,
       postcode,
+      personalizehoodieorder_id,
+      product_id,
+      status,
+      customer_id,
     } = body;
 
     // Build GraphQL mutation dynamically
@@ -35,8 +40,13 @@ export async function POST(req: NextRequest) {
           email: "${email}",
           phone: "${phone}",
           street: "${street}",
+          street2: "${street2 || ''}",
           city: "${city}",
           postcode: "${postcode}"
+          personalizehoodieorder_id: ${personalizehoodieorder_id},
+          product_id: ${product_id},
+          status: ${status},
+          customer_id: ${customer_id}
         ) {
           personalizehoodieorder_id
           product_sku
@@ -48,8 +58,12 @@ export async function POST(req: NextRequest) {
           email
           phone
           street
+          street2
           city
           postcode
+          status
+          customer_id
+          product_id
         }
       }
     `;

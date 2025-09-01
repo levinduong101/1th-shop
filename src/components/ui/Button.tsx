@@ -59,7 +59,7 @@ export const Button = ({
   };
 
   // Disabled styles - removed hover:scale-100
-  const disabledStyles = 'opacity-50 cursor-not-allowed hover:shadow-none';
+  const disabledStyles = 'opacity-20 !cursor-not-allowed hover:shadow-none';
 
   // Width styles
   const widthStyles = fullWidth ? 'w-full' : '';

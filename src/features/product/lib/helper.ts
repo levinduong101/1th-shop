@@ -9,9 +9,6 @@ export const getColorByLabel = (label: string): string | null => {
 };
 
 export const getColorClass = (label: string): string => {
-  // eslint-disable-next-line no-console
-  console.log('getColorClass called with label:', label);
-
   switch (label) {
     case 'BLACK':
       return 'bg-black/80 text-black';

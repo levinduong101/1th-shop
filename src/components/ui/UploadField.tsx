@@ -20,6 +20,7 @@ type UploadFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
   buttonClassName?: string;
   buttonVariant?: 'black' | 'red' | 'white' | 'brown';
   buttonContent?: React.ReactNode | string;
+  fileUrl?: string; // New prop for external file URL
 };
 
 const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
@@ -37,6 +38,7 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
     buttonClassName = '',
     buttonVariant = 'black',
     buttonContent = 'BROWSE FILES',
+    fileUrl,
     ...props
   }) => {
     const [preview, setPreview] = useState<string | null>(null);
@@ -46,8 +48,9 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
     const acceptTypes: { [key: string]: string[] } =
       accept === 'video'
         ? {
-            'video/mp4': ['.mp4'],
-            'video/quicktime': ['.mov'],
+            'video/mp4': ['.mp4'], // MP4 container
+            'video/quicktime': ['.mov'], // MOV container
+            'video/x-matroska': ['.mkv'], // MKV container
           }
         : {
             'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.svg'],
@@ -81,6 +84,9 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
       return fileType.startsWith('video/');
     }
 
+    // Check if we should show video background (either from preview or fileUrl)
+    const hasVideoBackground = preview || fileUrl;
+
     return (
       <div className='flex w-full flex-col gap-2'>
         {label && (
@@ -92,36 +98,38 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
         <div
           {...getRootProps()}
           className={clsx(
-            'group relative flex w-full cursor-pointer items-center justify-center border-gray-300 bg-white transition hover:bg-gray-50',
+            'group relative flex w-full cursor-pointer items-center justify-center border-gray-300 transition hover:bg-gray-50',
             isDragActive && 'border-blue-500 bg-blue-50',
             error && 'border-red-500',
-            onlyButton && !preview
+            onlyButton && !hasVideoBackground
               ? ''
               : 'h-100 overflow-hidden rounded-2xl border-2 border-dashed p-6',
+            // Only apply bg-white when there's no video background
+            !hasVideoBackground && 'bg-white',
             className,
           )}
         >
           {/* Hidden input for register/control */}
           <input ref={field?.ref} {...getInputProps({ ...props })} />
 
-          {/* If there is a preview => show thumbnail */}
-          {preview ? (
+          {/* If there is a preview or fileUrl => show thumbnail */}
+          {hasVideoBackground ? (
             <>
-              {fileType && isVideo(fileType) ? (
-                <video
-                  src={preview}
-                  className='absolute inset-0 h-full w-full object-cover'
-                  controls={false}
-                  muted
-                  preload='metadata' // Load metadata to display the first frame
-                />
-              ) : (
+              {fileType && !isVideo(fileType) ? (
                 <Image
-                  src={preview}
+                  src={preview!}
                   alt='preview'
                   className='absolute inset-0 h-full w-full object-cover'
                   width={500}
                   height={300}
+                />
+              ) : (
+                <video
+                  src={preview || fileUrl}
+                  className='absolute inset-0 h-full w-full object-cover'
+                  controls={false}
+                  muted
+                  preload='metadata' // Load metadata to display the first frame
                 />
               )}
 
@@ -131,7 +139,7 @@ const UploadField = forwardRef<HTMLInputElement, UploadFieldProps>(
               </div>
             </>
           ) : (
-            // UI when no file is selected
+            // UI when no file is selected and no fileUrl
             <div className='pointer-events-none flex w-full flex-col items-center gap-3'>
               {!onlyButton && (
                 <>

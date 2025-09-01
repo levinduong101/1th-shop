@@ -10,7 +10,11 @@ import AnimatedText from '@/src/components/ui/AnimatedText';
 import Redirect from './components/Redirect';
 import PopupWrapper from './components/PopupWrapper';
 
-export default function HomeView() {
+type Props = {
+  pinCode?: string;
+};
+
+export default function HomeView({}: Props) {
   return (
     <>
       <section className='grid min-h-screen w-full overflow-y-hidden lg:grid-cols-[1fr_max-content_1fr]'>

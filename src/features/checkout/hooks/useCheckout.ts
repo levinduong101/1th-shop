@@ -20,7 +20,15 @@ export const useCheckout = () => {
   return {
     isLoading,
 
-    async submit(data: CheckoutFormValues, pinCode: string) {
+    async submit({
+      data,
+      pinCode,
+      status,
+    }: {
+      data: CheckoutFormValues;
+      pinCode: string;
+      status: 1 | 5;
+    }) {
       if (loadingRef.current) return;
       if (!productStore?.file) {
         toast.error('Please upload a design image before submitting your order.');
@@ -30,15 +38,28 @@ export const useCheckout = () => {
         toast.error('Product SKU is not defined. Please contact support.');
         return;
       }
+      if (!user?.customer_id) {
+        toast.error('User is not authenticated. Please log in and try again.');
+        return;
+      }
+      if (!productStore?.product_id) {
+        toast.error('Product ID is missing. Please select a product and try again.');
+        return;
+      }
 
       loadingRef.current = true;
       setIsLoading(true);
 
       try {
-        const upload: any = await uploadImage(productStore.file);
+        let uploadUrl = typeof productStore?.file === 'string' ? productStore?.file : '';
+        if (typeof productStore?.file !== 'string') {
+          const upload: any = await uploadImage(productStore.file);
 
-        if (!upload?.url) {
-          throw new Error('Image upload failed. Please try again.');
+          if (!upload?.url) {
+            throw new Error('Image upload failed. Please try again.');
+          }
+
+          uploadUrl = upload.url;
         }
 
         const payload: CheckoutPayload = {
@@ -46,13 +67,18 @@ export const useCheckout = () => {
           restaurant_name: data.restaurantName,
           request_size: productStore?.size?.key || '',
           color: productStore?.color?.key || '',
-          logo: upload?.url || '',
+          logo: uploadUrl || '',
           employee_id: pinCode,
           email: data.email,
           phone: data.phone,
-          street: data.building + (data.street ? `, ${data.street}` : ''),
+          street: data.street,
+          street2: data.street2,
           city: data.district || '',
           postcode: data.postcode?.toString() || '',
+          personalizehoodieorder_id: status === 5 ? user?.personalize_draff || 0 : 0,
+          customer_id: user?.customer_id,
+          product_id: productStore?.product_id,
+          status: status,
         };
         const res = await submitCheckout(payload);
         if (res?.errors) {
@@ -63,18 +89,20 @@ export const useCheckout = () => {
           );
         }
 
-        if (!user?.name || !user?.email) {
-          setUser({
-            email: data.email,
-            name: data.restaurantName,
-            video: null,
-          });
+        const dataRes = res?.data?.createPersonalizeHoodieOrder;
+
+        if (dataRes) {
+          setUser({ ...user!, personalize_draff: dataRes.personalizehoodieorder_id });
         }
 
-        toast.success('Your order has been placed successfully!');
-        setTimeout(() => {
-          router.push('/confirm');
-        }, 500);
+        if (status === 1) {
+          toast.success('Your order has been placed successfully!');
+          setTimeout(() => {
+            router.push('/confirm');
+          }, 500);
+        } else if (status === 5) {
+          toast.success('Your draft has been saved successfully!');
+        }
       } catch (error: any) {
         toast.error(error?.message || 'An unexpected error occurred. Please try again.');
       } finally {

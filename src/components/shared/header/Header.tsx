@@ -11,7 +11,7 @@ export default function Header() {
       <Container className='flex items-stretch justify-between py-4'>
         <Menu />
 
-        <Link href='/landing' className='flex items-center rounded-full pl-2'>
+        <Link href='/' className='flex items-center rounded-full pl-2'>
           <Image
             src='/images/coca_cola_logo_red.svg'
             width={233}

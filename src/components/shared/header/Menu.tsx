@@ -35,7 +35,7 @@ export default function Menu() {
             <CloseIcon fill='white' className='lg:h-12 lg:w-12' />
           </Mapping>
 
-          <Link href='/landing'>
+          <Link href='/'>
             <Image
               src='/images/coca_cola_logo_red.svg'
               width={233}

@@ -28,7 +28,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   // Check valid pinCode
   if (!isValidPinCode()) {
     toast.error('Session expired. Please log in again.');
-    redirect('/landing');
+    redirect('/');
   }
 
   return <>{children}</>;
