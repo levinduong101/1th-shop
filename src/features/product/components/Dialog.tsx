@@ -17,7 +17,7 @@ type DialogProps<T extends FieldValues = ProductFormValues> = {
   open: boolean;
   setOpen: (open: boolean) => void;
   control: Control<T>;
-  file?: File | null;
+  file?: File | string | null;
   error: string | undefined;
   imageUrl: string;
 };
@@ -115,7 +115,7 @@ export default function DialogCustom({
                 >
                   {file && (
                     <Image
-                      src={URL.createObjectURL(file)}
+                      src={typeof file === 'string' ? file : URL.createObjectURL(file)}
                       alt='Uploaded File'
                       layout='fill'
                       className='mx-auto h-full object-contain'

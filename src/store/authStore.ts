@@ -5,7 +5,7 @@ import { User } from '../hooks/useAuth';
 interface AuthState {
   pinCode: string | null;
   pinCodeExpiry: number | null; // timestamp when pinCode expires
-  setPinCode: (pinCode: string | null) => void;
+  setPinCode: (pinCode: string | null, config?: { setExpTime: boolean }) => void;
   user: User | null;
   setUser: (user: User | null) => void;
   // Add flag to track hydration
@@ -23,10 +23,10 @@ export const useAuthStore = create<AuthState>()(
       // Pincode
       pinCode: null,
       pinCodeExpiry: null,
-      setPinCode: (pinCode) => {
+      setPinCode: (pinCode, config = { setExpTime: true }) => {
         if (pinCode) {
           // Set expire time 24h from now
-          const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+          const expiry = config.setExpTime ? Date.now() + 24 * 60 * 60 * 1000 : get().pinCodeExpiry;
           set({ pinCode, pinCodeExpiry: expiry });
         } else {
           // Clear pinCode and expiry

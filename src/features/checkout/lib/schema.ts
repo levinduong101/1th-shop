@@ -17,7 +17,7 @@ export const checkoutSchema = z.object({
     }),
   restaurantName: z.string().min(1, { message: 'Restaurant name is required' }),
   street: z.string().min(1, { message: 'Street is required' }),
-  building: z.string().optional(),
+  street2: z.string().optional(),
   district: z.string().min(1, { message: 'District is required' }),
   postcode: z
     .string('Postcode is required')

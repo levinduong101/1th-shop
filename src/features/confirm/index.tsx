@@ -16,7 +16,7 @@ export default function ConfirmView() {
       <section className='flex min-h-dvh w-full flex-col overflow-hidden'>
         <Container className='3xl:my-[188px] relative z-50 my-28 flex flex-col items-center gap-4 text-white'>
           <AnimatedSingleElement animation='fromLeft'>
-            <Link href='/landing' className='flex items-center rounded-full pl-2'>
+            <Link href='/' className='flex items-center rounded-full pl-2'>
               <Image
                 src='/images/coca_cola_logo.svg'
                 width={233}

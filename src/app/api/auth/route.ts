@@ -7,19 +7,31 @@ const ACCESS_TOKEN = process.env.ACCESS_TOKEN || '';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { pinCode } = body;
+    const { pinCode, email } = body;
 
     const query = `
-          query {
-            getEmployeeByCcepNummer(ccep_nummer: "${pinCode}") {
-              user {
-                name
-                email
-                video
-              }
+      query {
+        getEmployeeByCcepNummer(ccep_nummer: "${pinCode}", email: "${email}") {
+          user {
+            customer_id
+            ccepemployee_id
+            ccep_nummer
+            name
+            email
+            address {
+              street
+              building
+              city
+              postcode
             }
+            order_ids
+            video_id
+            personalize_items
+            personalize_draff
           }
-        `;
+        }
+      }
+    `;
 
     const response = await axios.post(
       `${GRAPHQL_URL}/graphql`,

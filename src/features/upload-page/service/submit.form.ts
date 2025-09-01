@@ -31,7 +31,7 @@ export const submitUploadForm = async ({
       },
     });
 
-    return res.data;
+    return res as any;
   } catch (error: any) {
     // eslint-disable-next-line no-console
     console.error('Upload error:', error);

@@ -17,7 +17,7 @@ import { useUploadForm } from './hooks/useUploadForm';
 import { useRouter } from 'next/navigation';
 import { LoaderCircle } from 'lucide-react';
 import { useAuthStore } from '@/src/store/authStore';
-import { DialogConfirm } from '@/src/components/shared/DialogConfirm';
+import { useGetFile } from './hooks/useGetFIle';
 
 export default function Form() {
   const [agree, setAgree] = useState(false);
@@ -25,7 +25,8 @@ export default function Form() {
   const pinCode = useAuthStore((state) => state.pinCode);
   const router = useRouter();
   const { submit, isLoading } = useUploadForm();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { isLoading: getUploadedLoading, getUploaded } = useGetFile();
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
 
   const {
     register,
@@ -36,8 +37,9 @@ export default function Form() {
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      customer_id: user ? user.customer_id : '',
       name: user ? user.name : '',
-      email: user ? user.email : '',
+      email: user ? user.email || '' : '',
       message: '',
       file: null as unknown as File,
     },
@@ -46,9 +48,21 @@ export default function Form() {
   /** Sync user - form */
   useEffect(() => {
     if (user) {
-      setValue('email', user.email || '');
-      setValue('name', user.name || '');
+      (async () => {
+        let name = user.name || '';
+        setValue('email', user.email || '');
+        if (user?.video_id) {
+          const uploaded = await getUploaded(user.video_id);
+          if (uploaded) {
+            setUploadedFile(uploaded?.video_url || null);
+            name = uploaded.name || name;
+            setValue('message', uploaded.message || '');
+          }
+        }
+        setValue('name', name);
+      })();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, setValue]);
 
   /** Handle submit */
@@ -61,16 +75,17 @@ export default function Form() {
       return;
     }
 
-    submit({ data, pinCode, callbackSuccess: () => setIsDialogOpen(false) });
-  };
-
-  /** Handle open confirm */
-  const onOpenConfirm = () => {
-    setIsDialogOpen(true);
+    submit({ data, pinCode });
   };
 
   return (
     <>
+      {getUploadedLoading && (
+        <div className='fixed inset-0 z-9999 grid place-items-center bg-black/20'>
+          <LoaderCircle className='text-red h-10 w-10 animate-spin' />
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         className='mx-auto mt-15 flex max-w-[1143px] flex-col gap-3 pb-[70px] lg:mt-11.5 lg:gap-13 lg:pb-20'
@@ -108,12 +123,7 @@ export default function Form() {
                 required
                 placeholder='Restaurant name'
                 error={errors.name?.message}
-                {...(user?.name
-                  ? {
-                      value: user.name,
-                      disabled: true,
-                    }
-                  : { ...register('name', { required: true }) })}
+                {...register('name', { required: true })}
               />
 
               <Input
@@ -137,12 +147,19 @@ export default function Form() {
                 {...register('message', { required: true })}
               />
 
+              {/* Mobile upload */}
               <div className='md:hidden'>
                 <Controller
                   name='file'
                   control={control}
                   rules={{ required: 'File is required' }}
-                  render={({ field }) => <UploadField field={field} error={errors.file?.message} />}
+                  render={({ field }) => (
+                    <UploadField
+                      field={field}
+                      error={errors.file?.message}
+                      {...(uploadedFile && { fileUrl: uploadedFile })}
+                    />
+                  )}
                 />
               </div>
 
@@ -158,12 +175,7 @@ export default function Form() {
                 variant='red'
                 animation='scaleIn'
                 disabled={!agree || isLoading}
-                {...(user?.video
-                  ? {
-                      type: 'button',
-                      onClick: handleSubmit(onOpenConfirm),
-                    }
-                  : { type: 'submit' })}
+                type='submit'
               >
                 {isLoading ? (
                   <LoaderCircle className='mx-auto h-7 animate-spin' />
@@ -174,25 +186,26 @@ export default function Form() {
             </div>
 
             <div className='hidden flex-col gap-8 md:flex'>
+              {/* Desktop upload */}
               <Controller
                 name='file'
                 control={control}
                 rules={{ required: 'File is required' }}
                 render={({ field }) => (
-                  <UploadField field={field} error={errors.file?.message} className='h-[540px]' />
+                  <UploadField
+                    field={field}
+                    error={errors.file?.message}
+                    className='h-[540px]'
+                    {...(uploadedFile && { fileUrl: uploadedFile })}
+                  />
                 )}
               />
 
               <Button
                 variant='red'
                 animation='scaleIn'
-                disabled={!agree || isLoading}
-                {...(user?.video
-                  ? {
-                      type: 'button',
-                      onClick: handleSubmit(onOpenConfirm),
-                    }
-                  : { type: 'submit' })}
+                disabled={!agree || isLoading || getUploadedLoading}
+                type='submit'
               >
                 {isLoading ? (
                   <LoaderCircle className='mx-auto h-7 animate-spin' />
@@ -203,15 +216,6 @@ export default function Form() {
             </div>
           </div>
         </Container>
-
-        <DialogConfirm
-          onClose={() => setIsDialogOpen(false)}
-          open={isDialogOpen}
-          onSubmit={handleSubmit(onSubmit)}
-          isLoading={isLoading}
-          title="You've already submitted a video"
-          content='Do you want to replace file (video)?'
-        />
       </form>
     </>
   );
