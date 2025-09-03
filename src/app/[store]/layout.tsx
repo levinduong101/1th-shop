@@ -19,9 +19,9 @@ async function getStoreBySlug(slug: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { store: string };
+  params: Promise<{ store: string }>;
 }): Promise<Metadata> {
-  const resolvedParams = await params;
+  const resolvedParams = await params; // Await the params Promise
   const res = await getStoreBySlug(resolvedParams.store);
   const data = res?.data;
 
