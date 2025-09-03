@@ -48,7 +48,7 @@ export default async function layout({
   params,
 }: {
   children: React.ReactNode;
-  params: { store: string };
+  params: Promise<{ store: string }>;
 }) {
   const resolvedParams = await params;
   const res = await getStoreBySlug(resolvedParams.store);
