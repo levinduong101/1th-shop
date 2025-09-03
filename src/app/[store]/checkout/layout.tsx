@@ -1,15 +1,15 @@
-import AuthLayout from '@/src/components/layout/AuthLayout';
-import CheckoutLayout from '@/src/components/layout/CheckoutLayout';
+import AuthProvider from '@/src/components/providers/AuthProvider';
+import CheckoutProvider from '@/src/components/providers/CheckoutProvider';
 import GridLayout from '@/src/components/layout/GridLayout';
 
 export default function layout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthLayout>
-      <CheckoutLayout>
+    <AuthProvider>
+      <CheckoutProvider>
         <GridLayout hideFooter hideHeader>
           {children}
         </GridLayout>
-      </CheckoutLayout>
-    </AuthLayout>
+      </CheckoutProvider>
+    </AuthProvider>
   );
 }

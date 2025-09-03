@@ -2,15 +2,16 @@
 
 import { useAuthStore } from '@/src/store/authStore';
 import { LoaderCircle } from 'lucide-react';
-import { redirect } from 'next/navigation';
+import { redirect, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const isValidPinCode = useAuthStore((state) => state.isValidPinCode);
   const pinCode = useAuthStore((state) => state.pinCode);
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const [isClient, setIsClient] = useState(false);
+  const { store } = useParams();
 
   useEffect(() => {
     setIsClient(true);
@@ -28,7 +29,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   // Check valid pinCode
   if (!isValidPinCode()) {
     toast.error('Session expired. Please log in again.');
-    redirect('/');
+    redirect(`/${store}/landing`);
   }
 
   return <>{children}</>;

@@ -71,7 +71,7 @@ export default function Form() {
 
     if (!pinCode) {
       toast.error('Employee ID is missing!');
-      router.push('/');
+      router.push('/landing');
       return;
     }
 

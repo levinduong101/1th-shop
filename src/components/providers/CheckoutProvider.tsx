@@ -1,15 +1,16 @@
 'use client';
 import { useProductStore } from '@/src/store/productStore';
-import { redirect } from 'next/navigation';
+import { redirect, useParams } from 'next/navigation';
 import React from 'react';
 import { toast } from 'react-toastify';
 
-export default function CheckoutLayout({ children }: { children: React.ReactNode }) {
+export default function CheckoutProvider({ children }: { children: React.ReactNode }) {
   const productStore = useProductStore((state) => state.formStore);
+  const { store } = useParams();
 
   if (!productStore) {
     toast.error('Please design your product first!');
-    redirect('/design-product');
+    redirect(`/${store}/personalize-product`);
   }
 
   return children;

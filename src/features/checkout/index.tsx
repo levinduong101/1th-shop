@@ -5,8 +5,7 @@ import { useProductStore } from '@/src/store/productStore';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, FileAxis3D, LoaderCircle, Pen } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { CheckoutFormValues, checkoutSchema } from './lib/schema';
 import { useEffect, useMemo, useState } from 'react';
@@ -19,6 +18,7 @@ import { useCheckout } from './hooks/useCheckout';
 import { useAuthStore } from '@/src/store/authStore';
 import { toast } from 'react-toastify';
 import { Alert, AlertDescription } from '@/src/components/ui/alert';
+import CustomLink from '@/src/components/ui/CustomLink';
 
 export default function CheckoutView() {
   const router = useRouter();
@@ -35,6 +35,7 @@ export default function CheckoutView() {
           .filter((item) => item && +item.trim() != user?.personalize_draff).length
       : 0;
   }, [user]);
+  const { store } = useParams();
 
   /** Use form */
   const {
@@ -86,14 +87,14 @@ export default function CheckoutView() {
   /** Handle back */
   const onBack = () => {
     onStoreData();
-    router.push('/design-product');
+    router.push(`/${store}/personalize-product`);
   };
 
   /** Handle submit form */
   const onSubmit = (data: CheckoutFormValues) => {
     if (!pinCode) {
       toast.error('Employee ID is missing!');
-      router.push('/');
+      router.push('/landing');
       return;
     }
 
@@ -104,7 +105,7 @@ export default function CheckoutView() {
   const onDraft = (data: CheckoutFormValues) => {
     if (!pinCode) {
       toast.error('Employee ID is missing!');
-      router.push('/');
+      router.push('/landing');
       return;
     }
 
@@ -124,7 +125,7 @@ export default function CheckoutView() {
             <ArrowLeft />
           </Button>
 
-          <Link href='/' className='flex items-center rounded-full pl-2'>
+          <CustomLink href='/landing' className='flex items-center rounded-full pl-2'>
             <Image
               src='/images/coca_cola_logo_red.svg'
               width={233}
@@ -133,7 +134,7 @@ export default function CheckoutView() {
               className='h-9 w-auto lg:h-10.5'
               priority
             />
-          </Link>
+          </CustomLink>
         </div>
 
         <div className='mt-5'>
@@ -316,9 +317,13 @@ export default function CheckoutView() {
               label={
                 <div className='text-sm'>
                   <span>I agree to the</span>{' '}
-                  <Link href='/terms' className='text-red hover:underline' onClick={onStoreData}>
+                  <CustomLink
+                    href='/terms'
+                    className='text-red hover:underline'
+                    onClick={onStoreData}
+                  >
                     Terms & Conditions
-                  </Link>
+                  </CustomLink>
                 </div>
               }
               onChange={(e) => setAgreement(e.target.checked)}
@@ -344,7 +349,7 @@ export default function CheckoutView() {
               onClick={handleSubmit(onDraft)}
               iconAnimation={<FileAxis3D />}
             >
-              {isLoading ? <LoaderCircle className='mx-auto h-7 animate-spin' /> : 'DRAFT ORDER'}
+              {isLoading ? <LoaderCircle className='mx-auto h-7 animate-spin' /> : 'SAVE AS DRAFT'}
             </Button>
           </div>
         </form>

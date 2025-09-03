@@ -2,11 +2,11 @@
 import clsx from 'clsx';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import React, { useCallback, useState } from 'react';
 
 import Container from '../../ui/Container';
 import { BottleCapIcon, CloseIcon, MenuIcon } from '../../ui/Icons';
+import CustomLink from '../../ui/CustomLink';
 
 const bottleSize = 47;
 
@@ -35,7 +35,7 @@ export default function Menu() {
             <CloseIcon fill='white' className='lg:h-12 lg:w-12' />
           </Mapping>
 
-          <Link href='/'>
+          <CustomLink href='/landing'>
             <Image
               src='/images/coca_cola_logo_red.svg'
               width={233}
@@ -43,12 +43,12 @@ export default function Menu() {
               alt='Coca Cola Logo'
               className='h-9 w-auto lg:h-10.5'
             />
-          </Link>
+          </CustomLink>
         </Container>
 
         <Container className='mt-5 flex flex-col'>
-          <Link
-            href='/design-product'
+          <CustomLink
+            href='/personalize-product'
             className='font-ccep-wide group hover:text-red flex items-center px-5 py-2.5 text-lg font-bold lg:text-3xl'
             onClick={onToggleMenu}
           >
@@ -57,9 +57,9 @@ export default function Menu() {
               strokeWidth={3}
               className={'w-0 transition-all duration-300 group-hover:ml-1 group-hover:w-8'}
             />
-          </Link>
-          <Link
-            href='/upload-video'
+          </CustomLink>
+          <CustomLink
+            href='/video-upload'
             className='font-ccep-wide group hover:text-red flex items-center px-5 py-2.5 text-lg font-bold lg:text-3xl'
             onClick={onToggleMenu}
           >
@@ -68,7 +68,7 @@ export default function Menu() {
               strokeWidth={3}
               className={'w-0 transition-all duration-300 group-hover:ml-1 group-hover:w-8'}
             />
-          </Link>
+          </CustomLink>
         </Container>
       </div>
     </>

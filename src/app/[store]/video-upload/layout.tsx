@@ -1,10 +1,10 @@
-import AuthLayout from '@/src/components/layout/AuthLayout';
+import AuthProvider from '@/src/components/providers/AuthProvider';
 import GridLayout from '@/src/components/layout/GridLayout';
 
 export default function layout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthLayout>
+    <AuthProvider>
       <GridLayout>{children}</GridLayout>
-    </AuthLayout>
+    </AuthProvider>
   );
 }

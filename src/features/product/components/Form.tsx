@@ -12,7 +12,7 @@ import { SIZE_CHART } from '../lib/data';
 import { getColorClass } from '../lib/helper';
 import Image from 'next/image';
 import { useProductStore } from '@/src/store/productStore';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Product } from '../service/get.product';
 import { useSelectedColor } from '@/src/store/selectedColorStore';
 import { useAuthStore } from '@/src/store/authStore';
@@ -47,6 +47,7 @@ export default function Form({ product }: { product: Product | null }) {
   const setSelectedColor = useSelectedColor((state) => state.setSelectedColor);
   const user = useAuthStore((state) => state.user);
   const { applyDraftOrder, isLoading: getDraftLoading } = useAppyDraft();
+  const { store } = useParams();
 
   /** Handle Options */
   const {
@@ -151,7 +152,7 @@ export default function Form({ product }: { product: Product | null }) {
   /** Handle submit */
   const onSubmit = (data: ProductFormValues) => {
     setFormStore({ ...data, product_id: product?.id || 0 });
-    router.push('/checkout');
+    router.push(`/${store}/checkout`);
   };
 
   /** Handle apply draft order */
@@ -363,7 +364,7 @@ export default function Form({ product }: { product: Product | null }) {
           className='w-max !py-2 !text-sm hover:bg-gray-300'
           onClick={handleApplyDraftOrder}
         >
-          Use the draft order
+          Apply Draft
         </Button>
 
         {OPTIONS?.map((option, index) => (

@@ -14,7 +14,7 @@ export default function Redirect() {
         <Button
           fullWidth
           variant='white'
-          href='/design-product'
+          href='/personalize-product'
           animation='scaleIn'
           disabled={!Boolean(pinCode)}
         >
@@ -25,7 +25,7 @@ export default function Redirect() {
         <Button
           fullWidth
           variant='black'
-          href='/upload-video'
+          href='/video-upload'
           animation='scaleIn'
           disabled={!Boolean(pinCode)}
         >

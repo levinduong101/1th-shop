@@ -5,8 +5,8 @@ import Container from '@/src/components/ui/Container';
 import Divider from '@/src/components/ui/divider';
 import clsx from 'clsx';
 import Image from 'next/image';
-import Link from 'next/link';
 import ClearForm from './ClearForm';
+import CustomLink from '@/src/components/ui/CustomLink';
 
 export default function ConfirmView() {
   return (
@@ -16,7 +16,7 @@ export default function ConfirmView() {
       <section className='flex min-h-dvh w-full flex-col overflow-hidden'>
         <Container className='3xl:my-[188px] relative z-50 my-28 flex flex-col items-center gap-4 text-white'>
           <AnimatedSingleElement animation='fromLeft'>
-            <Link href='/' className='flex items-center rounded-full pl-2'>
+            <CustomLink href='/landing' className='flex items-center rounded-full pl-2'>
               <Image
                 src='/images/coca_cola_logo.svg'
                 width={233}
@@ -24,7 +24,7 @@ export default function ConfirmView() {
                 alt='Coca Cola Logo'
                 className='h-9 w-auto lg:h-10.5'
               />
-            </Link>
+            </CustomLink>
           </AnimatedSingleElement>
 
           <AnimatedText
@@ -50,12 +50,12 @@ export default function ConfirmView() {
           {/* Buttons */}
           <div className='flex w-full max-w-[380px] flex-col gap-3'>
             <AnimatedSingleElement animation='fadeUp'>
-              <Button fullWidth variant='black' href='/upload-video' animation='scaleIn'>
+              <Button fullWidth variant='black' href='/video-upload' animation='scaleIn'>
                 SUBMIT A TEAM VIDEO
               </Button>
             </AnimatedSingleElement>
             <AnimatedSingleElement animation='fadeUp' delay={0.3}>
-              <Button fullWidth variant='white' href='/design-product' animation='scaleIn'>
+              <Button fullWidth variant='white' href='/personalize-product' animation='scaleIn'>
                 DESIGN YOUR TEAM HOODIE
               </Button>
             </AnimatedSingleElement>

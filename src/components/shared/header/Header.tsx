@@ -1,8 +1,8 @@
 import Image from 'next/image';
-import Link from 'next/link';
 
 import Menu from './Menu';
 import Container from '../../ui/Container';
+import CustomLink from '../../ui/CustomLink';
 
 export default function Header() {
   return (
@@ -11,7 +11,7 @@ export default function Header() {
       <Container className='flex items-stretch justify-between py-4'>
         <Menu />
 
-        <Link href='/' className='flex items-center rounded-full pl-2'>
+        <CustomLink href='/landing' className='flex items-center rounded-full pl-2'>
           <Image
             src='/images/coca_cola_logo_red.svg'
             width={233}
@@ -19,7 +19,7 @@ export default function Header() {
             alt='Coca Cola Logo'
             className='h-9 w-auto lg:h-10.5'
           />
-        </Link>
+        </CustomLink>
       </Container>
     </header>
   );
