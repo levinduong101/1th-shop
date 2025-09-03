@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 import React from 'react';
+import CustomLink from './CustomLink';
 
 interface ButtonProps {
   children?: React.ReactNode;
@@ -128,10 +128,10 @@ export const Button = ({
   // If href is provided, render as link
   if (href && !disabled) {
     return (
-      <Link href={href} target={target} {...commonProps} role='button' tabIndex={0}>
+      <CustomLink href={href} target={target} {...commonProps} tabIndex={0}>
         {children}
         {renderIcon()}
-      </Link>
+      </CustomLink>
     );
   }
 

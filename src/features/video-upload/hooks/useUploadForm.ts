@@ -40,7 +40,7 @@ export const useUploadForm = () => {
         toast.success('Your video has been submitted successfully!');
         callbackSuccess?.();
         setTimeout(() => {
-          router.push('/');
+          router.push('/landing');
         }, 1000);
       } finally {
         loadingRef.current = false;

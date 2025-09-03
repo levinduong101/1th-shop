@@ -3,6 +3,9 @@ import { persist } from 'zustand/middleware';
 import { User } from '../hooks/useAuth';
 
 interface AuthState {
+  store: string | null; // current store identifier
+  setStore: (store: string | null) => void;
+
   pinCode: string | null;
   pinCodeExpiry: number | null; // timestamp when pinCode expires
   setPinCode: (pinCode: string | null, config?: { setExpTime: boolean }) => void;
@@ -20,6 +23,10 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
+      // Store
+      store: null,
+      setStore: (store) => set({ store }),
+
       // Pincode
       pinCode: null,
       pinCodeExpiry: null,
@@ -70,6 +77,7 @@ export const useAuthStore = create<AuthState>()(
         pinCode: state.pinCode,
         pinCodeExpiry: state.pinCodeExpiry,
         user: state.user,
+        store: state.store,
       }),
       onRehydrateStorage: () => (state) => {
         // Check and remove expired pinCode immediately on hydrate
