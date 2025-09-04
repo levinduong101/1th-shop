@@ -94,7 +94,7 @@ export default function CheckoutView() {
   const onSubmit = (data: CheckoutFormValues) => {
     if (!pinCode) {
       toast.error('Employee ID is missing!');
-      router.push('/landing');
+      router.push(`/${store}/landing`);
       return;
     }
 
@@ -105,7 +105,7 @@ export default function CheckoutView() {
   const onDraft = (data: CheckoutFormValues) => {
     if (!pinCode) {
       toast.error('Employee ID is missing!');
-      router.push('/landing');
+      router.push(`/${store}/landing`);
       return;
     }
 
