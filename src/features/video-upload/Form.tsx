@@ -31,9 +31,19 @@ export default function Form() {
   const { store } = useParams();
   const [uploadedCount, setUploadedCount] = useState<null | { count: number; limit: number }>(null);
 
-  const isValidCount = useMemo(() => {
+  const canSubmit = useMemo(() => {
     if (!uploadedCount) return true;
-    return uploadedCount.count < uploadedCount.limit;
+    if (uploadedCount.limit === 0) return false;
+    if (uploadedCount.count >= uploadedCount.limit) return false;
+    return true;
+  }, [uploadedCount]);
+
+  const shouldShowNotification = useMemo(() => {
+    if (!uploadedCount) return false;
+    if (uploadedCount.limit === 0) return true;
+    if (uploadedCount.count > 0 && uploadedCount.count < uploadedCount.limit) return true;
+    if (uploadedCount.count >= uploadedCount.limit) return true;
+    return false;
   }, [uploadedCount]);
 
   const {
@@ -68,9 +78,7 @@ export default function Form() {
             setValue('file', uploaded.video_url || '');
             name = uploaded.name || name;
             setValue('message', uploaded.message || '');
-            if (uploaded.count_edit && uploaded.limit_configuration) {
-              setUploadedCount({ count: uploaded.count_edit, limit: uploaded.limit_configuration });
-            }
+            setUploadedCount({ count: uploaded.count_edit, limit: uploaded.limit_configuration });
           }
         }
         setValue('name', name);
@@ -132,19 +140,30 @@ export default function Form() {
         </div>
 
         <Container className='w-full xl:!px-0'>
-          {uploadedCount && (
+          {shouldShowNotification ? (
             <AnimatedSingleElement className='mb-5 lg:mb-10'>
-              {uploadedCount.count >= uploadedCount.limit && (
-                <Alert className='border-amber-200 bg-amber-50'>
+              {uploadedCount?.limit === 0 ? (
+                <Alert className='border-amber-400 bg-amber-50'>
+                  <AlertDescription className='text-amber-700'>
+                    <strong>Upload Completed:</strong> You have already uploaded your video. Each
+                    user is allowed to upload only once.
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+
+              {uploadedCount?.limit && uploadedCount.count >= uploadedCount.limit ? (
+                <Alert className='border-red-200 bg-red-50'>
                   <AlertDescription className='text-red'>
                     <strong>Edit Limit Reached:</strong> You have already updated this form{' '}
                     {uploadedCount.count} time(s). Each user can update the form a maximum of{' '}
                     {uploadedCount.limit} time(s).
                   </AlertDescription>
                 </Alert>
-              )}
+              ) : null}
 
-              {uploadedCount.count && uploadedCount.count < uploadedCount.limit ? (
+              {uploadedCount?.count &&
+              uploadedCount.count > 0 &&
+              uploadedCount.count < uploadedCount.limit ? (
                 <Alert className='border-blue-200 bg-blue-50'>
                   <AlertDescription className='text-blue-800'>
                     <strong>Notice:</strong> You have updated this form {uploadedCount.count}{' '}
@@ -154,7 +173,7 @@ export default function Form() {
                 </Alert>
               ) : null}
             </AnimatedSingleElement>
-          )}
+          ) : null}
 
           <div className='text-brown grid gap-15 md:grid-cols-2'>
             <div className='flex flex-col gap-4 md:gap-7.5'>
@@ -221,7 +240,7 @@ export default function Form() {
                 className='md:hidden'
                 variant='red'
                 animation='scaleIn'
-                disabled={!agree || isLoading}
+                disabled={!agree || isLoading || !canSubmit}
                 type='submit'
               >
                 {isLoading ? (
@@ -252,7 +271,7 @@ export default function Form() {
               <Button
                 variant='red'
                 animation='scaleIn'
-                disabled={!agree || isLoading || getUploadedLoading || !isValidCount}
+                disabled={!agree || isLoading || getUploadedLoading || !canSubmit}
                 type='submit'
               >
                 {isLoading ? (
