@@ -6,16 +6,19 @@ import { useAuthStore } from '@/src/store/authStore';
 type VideoResponse = {
   submission_id: string;
   customer_id: string;
-  employees_id: string;
   name: string;
   email: string;
   phone: string | null;
   message: string;
   video_filename: string;
+  s3_key: string | null;
   video_url: string;
   status: string;
-  created_at: string; // ISO datetime string
+  created_at: string; // ISO datetime
   updated_at: string | null;
+  employees_id: string;
+  count_edit: number;
+  limit_configuration: number;
 };
 
 export const useGetFile = () => {

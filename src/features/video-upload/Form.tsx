@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Button } from '@/src/components/ui/Button';
@@ -13,11 +13,13 @@ import Container from '@/src/components/ui/Container';
 import { FormValues, formSchema } from './lib/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-toastify';
-import { useUploadForm } from './hooks/useUploadForm';
-import { useRouter } from 'next/navigation';
+import { VideoFormPayload, useUploadForm } from './hooks/useUploadForm';
+import { useParams, useRouter } from 'next/navigation';
 import { LoaderCircle } from 'lucide-react';
 import { useAuthStore } from '@/src/store/authStore';
 import { useGetFile } from './hooks/useGetFIle';
+import { Alert, AlertDescription } from '@/src/components/ui/alert';
+import AnimatedSingleElement from '@/src/components/ui/AnimatedSingleElement';
 
 export default function Form() {
   const [agree, setAgree] = useState(false);
@@ -26,7 +28,13 @@ export default function Form() {
   const router = useRouter();
   const { submit, isLoading } = useUploadForm();
   const { isLoading: getUploadedLoading, getUploaded } = useGetFile();
-  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const { store } = useParams();
+  const [uploadedCount, setUploadedCount] = useState<null | { count: number; limit: number }>(null);
+
+  const isValidCount = useMemo(() => {
+    if (!uploadedCount) return true;
+    return uploadedCount.count < uploadedCount.limit;
+  }, [uploadedCount]);
 
   const {
     register,
@@ -34,6 +42,7 @@ export default function Form() {
     formState: { errors },
     control,
     setValue,
+    watch,
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,9 +50,11 @@ export default function Form() {
       name: user ? user.name : '',
       email: user ? user.email || '' : '',
       message: '',
-      file: null as unknown as File,
+      file: '',
     },
   });
+
+  const uploadedFile = watch('file');
 
   /** Sync user - form */
   useEffect(() => {
@@ -54,9 +65,12 @@ export default function Form() {
         if (user?.video_id) {
           const uploaded = await getUploaded(user.video_id);
           if (uploaded) {
-            setUploadedFile(uploaded?.video_url || null);
+            setValue('file', uploaded.video_url || '');
             name = uploaded.name || name;
             setValue('message', uploaded.message || '');
+            if (uploaded.count_edit && uploaded.limit_configuration) {
+              setUploadedCount({ count: uploaded.count_edit, limit: uploaded.limit_configuration });
+            }
           }
         }
         setValue('name', name);
@@ -71,11 +85,19 @@ export default function Form() {
 
     if (!pinCode) {
       toast.error('Employee ID is missing!');
-      router.push('/landing');
+      router.push(`/${store}/landing`);
       return;
     }
 
-    submit({ data, pinCode });
+    const payload: VideoFormPayload = {
+      customer_id: data.customer_id,
+      name: data.name,
+      email: data.email,
+      message: data.message,
+      ...{ ...(data.file && typeof data.file !== 'string' ? { file: data.file } : {}) },
+    };
+
+    submit({ data: payload, pinCode });
   };
 
   return (
@@ -110,6 +132,30 @@ export default function Form() {
         </div>
 
         <Container className='w-full xl:!px-0'>
+          {uploadedCount && (
+            <AnimatedSingleElement className='mb-5 lg:mb-10'>
+              {uploadedCount.count >= uploadedCount.limit && (
+                <Alert className='border-amber-200 bg-amber-50'>
+                  <AlertDescription className='text-red'>
+                    <strong>Edit Limit Reached:</strong> You have already updated this form{' '}
+                    {uploadedCount.count} time(s). Each user can update the form a maximum of{' '}
+                    {uploadedCount.limit} time(s).
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {uploadedCount.count && uploadedCount.count < uploadedCount.limit ? (
+                <Alert className='border-blue-200 bg-blue-50'>
+                  <AlertDescription className='text-blue-800'>
+                    <strong>Notice:</strong> You have updated this form {uploadedCount.count}{' '}
+                    time(s). You can update it {uploadedCount.limit - uploadedCount.count} more
+                    time(s) (maximum {uploadedCount.limit}).
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+            </AnimatedSingleElement>
+          )}
+
           <div className='text-brown grid gap-15 md:grid-cols-2'>
             <div className='flex flex-col gap-4 md:gap-7.5'>
               <p className='font-ccep-wide mb-4 text-lg leading-[1] font-light lg:mb-6.5 lg:text-2xl'>
@@ -157,7 +203,8 @@ export default function Form() {
                     <UploadField
                       field={field}
                       error={errors.file?.message}
-                      {...(uploadedFile && { fileUrl: uploadedFile })}
+                      {...(uploadedFile &&
+                        typeof uploadedFile === 'string' && { fileUrl: uploadedFile })}
                     />
                   )}
                 />
@@ -196,7 +243,8 @@ export default function Form() {
                     field={field}
                     error={errors.file?.message}
                     className='h-[540px]'
-                    {...(uploadedFile && { fileUrl: uploadedFile })}
+                    {...(uploadedFile &&
+                      typeof uploadedFile === 'string' && { fileUrl: uploadedFile })}
                   />
                 )}
               />
@@ -204,7 +252,7 @@ export default function Form() {
               <Button
                 variant='red'
                 animation='scaleIn'
-                disabled={!agree || isLoading || getUploadedLoading}
+                disabled={!agree || isLoading || getUploadedLoading || !isValidCount}
                 type='submit'
               >
                 {isLoading ? (

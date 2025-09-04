@@ -2,8 +2,10 @@ import { toast } from 'react-toastify';
 import { FormValues } from '../lib/schema';
 import { submitUploadForm } from '../service/submit.form';
 import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/src/store/authStore';
+
+export type VideoFormPayload = Omit<FormValues, 'file'> & { file?: File };
 
 export const useUploadForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,6 +13,7 @@ export const useUploadForm = () => {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const { store } = useParams();
 
   return {
     isLoading,
@@ -20,7 +23,7 @@ export const useUploadForm = () => {
       data,
       pinCode,
     }: {
-      data: FormValues;
+      data: VideoFormPayload;
       pinCode: string;
       callbackSuccess?: () => void;
     }) {
@@ -40,7 +43,7 @@ export const useUploadForm = () => {
         toast.success('Your video has been submitted successfully!');
         callbackSuccess?.();
         setTimeout(() => {
-          router.push('/landing');
+          router.push(`/${store}/landing`);
         }, 1000);
       } finally {
         loadingRef.current = false;

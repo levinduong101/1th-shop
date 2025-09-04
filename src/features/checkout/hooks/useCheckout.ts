@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { CheckoutPayload, submitCheckout } from '../service/submit.checkout';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useProductStore } from '@/src/store/productStore';
 import { CheckoutFormValues } from '../lib/schema';
 import { uploadImage } from '../service/upload.image';
@@ -16,6 +16,7 @@ export const useCheckout = () => {
   const { formStore: productStore } = useProductStore();
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const { store } = useParams();
 
   return {
     isLoading,
@@ -103,7 +104,7 @@ export const useCheckout = () => {
         if (status === 1) {
           toast.success('Your order has been placed successfully!');
           setTimeout(() => {
-            router.push('/confirm');
+            router.push(`/${store}/confirm`);
           }, 500);
         } else if (status === 5) {
           toast.success('Your draft has been saved successfully!');

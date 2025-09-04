@@ -1,11 +1,11 @@
 import apiProxyUpload from '@/src/lib/api-proxy-upload';
-import { FormValues } from '../lib/schema';
+import { VideoFormPayload } from '../hooks/useUploadForm';
 
 export const submitUploadForm = async ({
   data,
   pinCode,
 }: {
-  data: FormValues;
+  data: VideoFormPayload;
   pinCode: string;
 }) => {
   try {
