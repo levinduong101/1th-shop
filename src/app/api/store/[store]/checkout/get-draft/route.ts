@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
                     creation_time
                     update_time
                     status
+                    text_color
                 }
             }
     `;

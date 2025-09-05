@@ -2,14 +2,14 @@
 import { Button } from '@/src/components/ui/Button';
 import { RulerIcon, UploadIcon, UploadSimpleIcon } from '@/src/components/ui/Icons';
 import clsx from 'clsx';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { ProductFormSchema, ProductFormValues } from '../lib/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Popover, PopoverContent, PopoverTrigger } from '@/src/components/ui/popover';
 import React, { useEffect, useMemo, useState } from 'react';
 import DialogCustom from './Dialog';
 import { SIZE_CHART } from '../lib/data';
-import { getColorClass } from '../lib/helper';
+import { getColorClass, getOptionKeyById } from '../lib/helper';
 import Image from 'next/image';
 import { useProductStore } from '@/src/store/productStore';
 import { useParams, useRouter } from 'next/navigation';
@@ -18,6 +18,8 @@ import { useSelectedColor } from '@/src/store/selectedColorStore';
 import { useAuthStore } from '@/src/store/authStore';
 import { useAppyDraft } from '../hooks/useApplyDraft';
 import { LoaderCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/src/components/ui/tooltip';
+import UploadButton from './UploadButton';
 
 type OptionType = 'CustomizableDropDownOption' | 'CustomizableFieldOption';
 
@@ -27,6 +29,7 @@ type ValueItem = {
 };
 
 type Option = {
+  id: number | string;
   title: string;
   values?: ValueItem[];
   type: OptionType;
@@ -55,17 +58,20 @@ export default function Form({ product }: { product: Product | null }) {
     colorMapImageByLabel,
     colorMapById,
     sizeMapById,
+    logoColorMapById
   }: {
     OPTIONS: Option[];
     colorMapImageByLabel: Map<string, string>;
     colorMapById: Map<string, string>;
     sizeMapById: Map<string, string>;
+    logoColorMapById: Map<string, string>;
   } = useMemo(() => {
     const options =
       product?.options
         ?.sort((a, b) => a.sort_order - b.sort_order)
         .map((option) => {
           return {
+            id: option.option_id,
             title: option.title,
             values:
               option.value?.map((v) => ({
@@ -81,18 +87,28 @@ export default function Form({ product }: { product: Product | null }) {
       colorMapImageByLabel.set(media?.label?.toUpperCase(), media.url);
     });
 
+    // Color
     const colorMapById = new Map();
     product?.options
-      ?.find((opt) => opt.title.toLowerCase().includes('color'))
+      ?.find((opt) => opt.title.toLowerCase().startsWith('color'))
       ?.value?.forEach((val) => {
         colorMapById.set(val.option_type_id.toString(), val.title?.toUpperCase() || '');
       });
 
+    // Size
     const sizeMapById = new Map();
     product?.options
-      ?.find((opt) => opt.title.toLowerCase().includes('size'))
+      ?.find((opt) => opt.title.toLowerCase().startsWith('size'))
       ?.value?.forEach((val) => {
         sizeMapById.set(val.option_type_id.toString(), val.title?.toUpperCase() || '');
+      });
+
+    // Logo Color
+    const logoColorMapById = new Map();
+    product?.options
+      ?.find((opt) => opt.title.toLowerCase().endsWith(' color'))
+      ?.value?.forEach((val) => {
+        logoColorMapById.set(val.option_type_id.toString(), val.title?.toUpperCase() || '');
       });
 
     return {
@@ -100,6 +116,7 @@ export default function Form({ product }: { product: Product | null }) {
       colorMapImageByLabel,
       colorMapById,
       sizeMapById,
+      logoColorMapById
     };
   }, [product]);
 
@@ -119,24 +136,36 @@ export default function Form({ product }: { product: Product | null }) {
   useEffect(() => {
     const colorOption = OPTIONS?.find((opt) => opt.title.toLowerCase().includes('color'));
     const sizeOption = OPTIONS?.find((opt) => opt.title.toLowerCase().includes('size'));
+    const logoColorOption = OPTIONS?.find((opt) => opt.title.toLowerCase().endsWith(' color'));
 
     const initColor = colorOption?.values?.[0];
     const initSize = sizeOption?.values?.[0];
     const initImage = initColor?.label ? colorMapImageByLabel.get(initColor.label) : '';
+    const initLogoColor = logoColorOption?.values?.[1] || { key: '', label: '' };
+
+    const fileInStore = formStore?.file;
+    if (fileInStore) {
+      fileInStore.isUpdate = true;
+    }
 
     reset(
-      formStore || {
+      formStore ? {
+        ...formStore,
+        file: fileInStore as unknown as File,
+      } : {
         selectedImage: initImage || '',
         size: initSize || { key: '', label: '' },
         color: initColor || { key: '', label: '' },
+        logoColor: initLogoColor || { key: '', label: '' },
         file: null as unknown as File,
       },
     );
   }, [reset, OPTIONS, colorMapImageByLabel, formStore]);
 
-  const selectedSize = watch('size');
-  const selectedColor = watch('color');
-  const selectedFile = watch('file');
+  const [selectedSize, selectedColor, selectedLogoColor, selectedFile] = useWatch({
+    control,
+    name: ['size', 'color', 'logoColor', 'file'],
+  });
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const router = useRouter();
 
@@ -161,6 +190,7 @@ export default function Form({ product }: { product: Product | null }) {
       orderId: user?.personalize_draff || 0,
       colorMapById,
       sizeMapById,
+      logoColorMapById
     });
   };
 
@@ -177,56 +207,20 @@ export default function Form({ product }: { product: Product | null }) {
               it&apos;s clear, high contrast, and free of watermarks.
             </p>
 
-            <Button
-              type='button'
-              variant='white'
-              fullWidth
-              className={clsx(
-                '!p-0 text-sm transition-none lg:h-13',
-                selectedFile
-                  ? 'relative !h-100 overflow-hidden !rounded-2xl border-2 border-dashed p-6'
-                  : 'h-11',
-              )}
-              onClick={() => setOpenDialog(true)}
-              iconAnimation={<UploadSimpleIcon />}
-              animation={selectedFile ? undefined : 'fadeUp'}
-            >
-              {selectedFile ? (
-                <>
-                  <Image
-                    src={
-                      typeof selectedFile === 'string'
-                        ? selectedFile
-                        : URL.createObjectURL(selectedFile)
-                    }
-                    alt='preview'
-                    className='absolute inset-0 h-full w-full object-contain p-5'
-                    width={500}
-                    height={300}
-                  />
-
-                  {/* Overlay with blur + upload icon */}
-                  <div className='absolute inset-0 flex items-center justify-center bg-black/30'>
-                    <UploadIcon fill='black' bgFill='white' />
-                  </div>
-                </>
-              ) : (
-                <span>PLACE LOGO</span>
-              )}
-            </Button>
-
+            <UploadButton selectedFile={selectedFile} setOpenDialog={setOpenDialog} />
             {errors?.file && <p className='ml-1 text-xs text-red-500'>{errors.file.message}</p>}
           </div>
         );
 
       case 'CustomizableDropDownOption':
-        const title = option.title.toLowerCase();
-        if (title.includes('size')) {
+        const id = option.id
+        const optionKey = getOptionKeyById(id);
+        if (optionKey === 'size') {
           return (
             <div className='font-ccep-wide flex flex-col gap-3'>
               <div className='flex w-full items-center justify-between text-sm'>
                 <div className='flex items-center gap-3 lg:gap-4'>
-                  <span className='font-medium lg:text-xl'>Size</span>
+                  <span className='font-medium lg:text-xl'>{option.title}</span>
                   <span className='font-light'>{selectedSize?.label || ''}</span>
                 </div>
 
@@ -301,43 +295,110 @@ export default function Form({ product }: { product: Product | null }) {
             </div>
           );
         }
-        if (title.includes('color')) {
+        if (optionKey === 'color') {
           return (
             <div className='font-ccep-wide flex flex-col gap-3'>
               <div className='flex w-full items-center justify-between text-sm'>
-                <span className='font-medium lg:text-xl'>Color</span>
+                <span className='font-medium lg:text-xl'>{option.title}</span>
               </div>
 
               <Controller
                 name='color'
                 control={control}
                 render={({ field }) => (
-                  <div className='flex flex-wrap items-center gap-3'>
-                    {option?.values &&
-                      option.values.map((color, index) => {
-                        return (
-                          <button
-                            key={index}
-                            type='button'
-                            className={clsx(
-                              'relative grid aspect-square h-[35px] cursor-pointer place-items-center rounded-[40px] border-2 p-0.5 text-sm transition-colors duration-300',
-                              field.value?.key === color.key && '!border-brown',
-                            )}
-                            onClick={() => {
-                              field.onChange(color);
-                              setSelectedColor(color.label.toUpperCase());
-                            }}
-                          >
-                            <div
-                              className={clsx(
-                                'h-full w-full rounded-full',
-                                getColorClass(color.label),
-                              )}
-                            />
-                          </button>
-                        );
-                      })}
-                  </div>
+                  <TooltipProvider>
+                    <div className='flex flex-wrap items-center gap-3'>
+                      {option?.values &&
+                        option.values.map((color, index) => {
+                          const isSameBlackColor = selectedLogoColor?.label === 'BLACK' && color?.label === 'BLACK'
+
+                          return (
+                            <Tooltip key={index}>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type='button'
+                                  className={clsx(
+                                    'relative grid aspect-square h-[35px] cursor-pointer place-items-center rounded-[40px] border-2 p-0.5 text-sm transition duration-300',
+                                    field.value?.key === color.key && '!border-brown',
+                                    isSameBlackColor && '!cursor-not-allowed opacity-20',
+                                  )}
+                                  disabled={isSameBlackColor}
+                                  onClick={() => {
+                                    if (isSameBlackColor) return;
+                                    field.onChange(color);
+                                    setSelectedColor(color.label.toUpperCase());
+                                  }}
+                                >
+                                  <div
+                                    className={clsx(
+                                      'h-full w-full rounded-full',
+                                      getColorClass(color.label),
+                                    )}
+                                  />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{color.label}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
+                    </div>
+                  </TooltipProvider>
+                )}
+              />
+            </div>
+          );
+        }
+        if (optionKey === 'logo_color') {
+          return (
+            <div className='font-ccep-wide flex flex-col gap-3'>
+              <div className='flex w-full items-center justify-between text-sm'>
+                <span className='font-medium lg:text-xl'>{option.title}</span>
+              </div>
+
+              <Controller
+                name='logoColor'
+                control={control}
+                render={({ field }) => (
+                  <TooltipProvider>
+                    <div className='flex flex-wrap items-center gap-3'>
+                      {option?.values &&
+                        option.values.map((color, index) => {
+                          const isSameBlackColor = selectedColor?.label === 'BLACK' && color?.label === 'BLACK'
+
+                          return (
+                            <Tooltip key={index}>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type='button'
+                                  className={clsx(
+                                    'relative grid aspect-square h-[35px] cursor-pointer place-items-center rounded-[40px] border-2 p-0.5 text-sm transition duration-300',
+                                    field.value?.key === color.key && '!border-brown',
+                                    isSameBlackColor && '!cursor-not-allowed opacity-20',
+                                  )}
+                                  disabled={isSameBlackColor}
+                                  onClick={() => {
+                                    if (isSameBlackColor) return;
+                                    field.onChange(color);
+                                  }}
+                                >
+                                  <div
+                                    className={clsx(
+                                      'h-full w-full rounded-full',
+                                      getColorClass(color.label),
+                                    )}
+                                  />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{color.label}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
+                    </div>
+                  </TooltipProvider>
                 )}
               />
             </div>
@@ -356,7 +417,7 @@ export default function Form({ product }: { product: Product | null }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className='flex w-full flex-col gap-4.5 lg:gap-7.5'>
+      <form onSubmit={handleSubmit(onSubmit)} className='flex w-full flex-col gap-2.5 lg:gap-5'>
         <Button
           type='button'
           variant='white'
@@ -395,6 +456,8 @@ export default function Form({ product }: { product: Product | null }) {
           control={control}
           file={selectedFile}
           error={errors.file?.message}
+          color={watch('logoColor')?.label}
+          setValue={setValue}
         />
       </form>
     </>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { CheckoutPayload } from '@/src/features/checkout/service/submit.checkout';
 
 const GRAPHQL_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://merch-base.prowerb.digital';
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || '';
@@ -25,7 +26,8 @@ export async function POST(req: NextRequest) {
       product_id,
       status,
       customer_id,
-    } = body;
+      text_color
+    }: CheckoutPayload = body;
 
     // Build GraphQL mutation dynamically
     const mutation = `
@@ -47,6 +49,7 @@ export async function POST(req: NextRequest) {
           product_id: ${product_id},
           status: ${status},
           customer_id: ${customer_id}
+          text_color: ${text_color}
         ) {
           personalizehoodieorder_id
           product_sku
@@ -64,6 +67,7 @@ export async function POST(req: NextRequest) {
           status
           customer_id
           product_id
+          text_color
         }
       }
     `;

@@ -78,55 +78,55 @@ query Products($sku: String!) {
 `;
 
 export interface ProductImage {
-  url: string;
-  label: string | null;
+    url: string;
+    label: string | null;
 }
 
 export interface MediaGalleryItem {
-  url: string;
-  label: string | null;
-  position: number;
-  disabled: boolean;
+    url: string;
+    label: string | null;
+    position: number;
+    disabled: boolean;
 }
 
 export interface ProductOptionValue {
-  option_type_id: number;
-  title: string;
-  price: number;
-  price_type: string;
+    option_type_id: number;
+    title: string;
+    price: number;
+    price_type: string;
 }
 
 export interface ProductOption {
-  option_id: number;
-  required: boolean;
-  sort_order: number;
-  title: string;
-  __typename: string; // "CustomizableDropDownOption" | "CustomizableFieldOption" | ...
-  value?: ProductOptionValue[];
+    option_id: number;
+    required: boolean;
+    sort_order: number;
+    title: string;
+    __typename: string; // "CustomizableDropDownOption" | "CustomizableFieldOption" | ...
+    value?: ProductOptionValue[];
 }
 
 export interface Product {
-  id: number;
-  name: string;
-  sku: string;
-  description: {
-    html: string;
-  };
-  image: ProductImage;
-  small_image: ProductImage;
-  thumbnail: ProductImage;
-  media_gallery: MediaGalleryItem[];
-  options?: ProductOption[];
+    id: number;
+    name: string;
+    sku: string;
+    description: {
+        html: string;
+    };
+    image: ProductImage;
+    small_image: ProductImage;
+    thumbnail: ProductImage;
+    media_gallery: MediaGalleryItem[];
+    options?: ProductOption[];
 }
 
 interface ProductResponse {
-  products: {
-    items: Product[];
-  };
+    products: {
+        items: Product[];
+    };
 }
 
-export async function getProduct(sku: string): Promise<Product | null> {
-  const data = await apiGraphQLServer<ProductResponse>(PRODUCT_QUERY, { sku }, { revalidate: 60 });
+export async function getProduct(sku: string, locale: string): Promise<Product | null> {
+    const data = await apiGraphQLServer<ProductResponse>(PRODUCT_QUERY, locale, { sku }, { revalidate: 60 });
 
-  return data?.products?.items?.[0] ?? null;
+    return data?.products?.items?.[0] ?? null;
 }

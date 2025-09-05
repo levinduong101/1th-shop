@@ -1,36 +1,78 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Container from '@/src/components/ui/Container';
-import { Control, Controller } from 'react-hook-form';
+import { Control, Controller, UseFormSetValue } from 'react-hook-form';
 import { ProductFormValues } from '../lib/schema';
 import { FieldValues } from 'react-hook-form';
 import { Button } from '@/src/components/ui/Button';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronRight, LoaderCircle } from 'lucide-react';
 import clsx from 'clsx';
 import { UploadSimpleIcon } from '@/src/components/ui/Icons';
 import gsap from 'gsap';
-import Image from 'next/image';
+import NextImage from 'next/image';
 import Input from '@/src/components/ui/Input';
+import { useImageWorker } from '../hooks/useImageWorker';
+import { CustomFile } from '../hooks/useApplyDraft';
 
 type DialogProps<T extends FieldValues = ProductFormValues> = {
   open: boolean;
   setOpen: (open: boolean) => void;
   control: Control<T>;
-  file?: File | string | null;
   error: string | undefined;
   imageUrl: string;
+  color: string; // 'black' | 'white'
+  file: CustomFile | null
+  setValue: UseFormSetValue<ProductFormValues>
 };
 
 export default function DialogCustom({
   control,
-  file,
   open,
   setOpen,
   error,
   imageUrl,
+  color,
+  file,
+  setValue
 }: DialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<CustomFile | null>(null);
+
+  useEffect(() => {
+    if (file?.isUpdate) {
+      let tmpFile = file;
+      tmpFile.isUpdate = false;
+      setProcessedImageUrl(URL.createObjectURL(tmpFile));
+      setSelectedFile(tmpFile);
+    }
+  }, [file?.isUpdate, setProcessedImageUrl, setSelectedFile])
+
+  // Use the Web Worker hook
+  const { processImage, isProcessing } = useImageWorker();
+
+  // Handle file change with Web Worker
+  useEffect(() => {
+    if (!color || !open) return; // only process when have color, file and dialog is open
+
+    if (!selectedFile) return;
+
+    const process = async () => {
+      const result = await processImage(selectedFile, color);
+      setProcessedImageUrl(result?.blobUrl || null);
+      if (result) {
+        const file = result.processedFile;
+        (file as CustomFile).isUpdate = false;
+        setValue('file', file);
+      } else {
+        setSelectedFile(null);
+        setValue('file', null as unknown as File);
+      }
+    };
+
+    process()
+  }, [color, processImage, open, selectedFile, setSelectedFile, setProcessedImageUrl]);
 
   /** Animation when open */
   useEffect(() => {
@@ -42,7 +84,12 @@ export default function DialogCustom({
       gsap.fromTo(
         dialogRef.current,
         { opacity: 0, x: 100 },
-        { opacity: 1, x: 0, duration: 0.2, ease: 'power2.out' },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.2,
+          ease: 'power2.out',
+        },
       );
     }
 
@@ -97,7 +144,7 @@ export default function DialogCustom({
         {/* Image */}
         <div className='grid flex-1 place-items-center'>
           <div className='relative h-full'>
-            <Image
+            <NextImage
               src={imageUrl}
               width={500}
               height={500}
@@ -105,25 +152,52 @@ export default function DialogCustom({
               className='h-full w-auto object-contain'
             />
 
-            {file && (
+            {selectedFile || file ? (
               <div className='absolute inset-0 z-10 flex items-center justify-center'>
                 <div
                   className={clsx(
-                    // 'flex h-1/5 w-2/5  translate-y-[10%] flex-col gap-1 relative',
                     'relative flex aspect-square w-2/5 -translate-y-[30%] flex-col justify-center gap-1',
                   )}
                 >
-                  {file && (
-                    <Image
-                      src={typeof file === 'string' ? file : URL.createObjectURL(file)}
-                      alt='Uploaded File'
-                      layout='fill'
-                      className='mx-auto h-full object-contain'
-                    />
-                  )}
+                  {isProcessing ? (
+                    <div className='fixed inset-0 z-9999 grid place-items-center'>
+                      <LoaderCircle className='text-red h-10 w-10 animate-spin' />
+                    </div>
+                  ) : processedImageUrl ?
+                    (
+                      <div className='grid grid-rows-3 gap-2 w-full h-full'>
+                        {/* Show processed image if available, otherwise show original image */}
+                        <NextImage
+                          src={processedImageUrl || ''}
+                          alt='Uploaded File'
+                          width={100}
+                          height={100}
+                          className='mx-auto h-full w-full object-contain'
+                        />
+                        {color ? (
+                          <div className='relative row-span-2 w-full'>
+                            {color.toLowerCase() === 'black' ? (
+                              <NextImage
+                                src='/images/product-page/hoodie_front_black.png'
+                                alt='Uploaded File'
+                                layout='fill'
+                                className='mx-auto h-full object-contain'
+                              />
+                            ) : (
+                              <NextImage
+                                src='/images/product-page/hoodie_front_white.png'
+                                alt='Uploaded File'
+                                layout='fill'
+                                className='mx-auto h-full object-contain'
+                              />
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
         {error && <p className='ml-1 text-center text-xs text-red-500'>{error}</p>}
@@ -135,13 +209,15 @@ export default function DialogCustom({
               name='file'
               control={control}
               rules={{ required: 'File is required' }}
-              render={({ field: { onChange, name } }) => (
+              render={({ field: { name } }) => (
                 <Input
                   type='file'
-                  accept='.jpg,.jpeg,.png,.gif,.tiff,.tif,.webp'
+                  // accept='.jpg,.jpeg,.png,.tiff,.tif,.webp,.svg'
+                  accept=".png,.jpg,.jpeg,.bmp,.tiff,.svg"
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
-                      onChange(e.target.files[0]);
+                      // onChange(e.target.files[0]);
+                      setSelectedFile(e.target.files[0]);
                     }
                   }}
                   name={name}
@@ -154,8 +230,9 @@ export default function DialogCustom({
                       onClick={trigger}
                       animation='fadeUp'
                       iconAnimation={<UploadSimpleIcon />}
+                      disabled={isProcessing}
                     >
-                      <span>UPLOAD FILES</span>
+                      <span>{isProcessing ? 'PROCESSING...' : 'UPLOAD FILES'}</span>
                     </Button>
                   )}
                 />
@@ -169,7 +246,7 @@ export default function DialogCustom({
             className='h-13 max-w-[352px] text-sm'
             animation='fadeUp'
             iconAnimation={<ChevronRight height={20} />}
-            disabled={!Boolean(file)}
+            disabled={!Boolean(file || selectedFile) || isProcessing}
           >
             PROCEED TO CHECKOUT
           </Button>

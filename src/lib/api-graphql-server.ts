@@ -8,6 +8,7 @@ interface GraphQLResponse<T> {
 
 export async function apiGraphQLServer<T>(
   query: string,
+  locale: string,
   variables: Record<string, any> = {},
   options?: { revalidate?: number },
 ): Promise<T | null> {
@@ -17,7 +18,7 @@ export async function apiGraphQLServer<T>(
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${ACCESS_TOKEN}`,
-        'tenant-domain': 'ccep',
+        'store': locale
       },
       body: JSON.stringify({ query, variables }),
       next: { revalidate: options?.revalidate ?? 60 }, // default 60s
