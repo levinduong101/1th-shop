@@ -17,7 +17,7 @@ export type CheckoutPayload = {
   product_id: number;
   status: 1 | 5; // 1 -> Pending, 5 -> Draff
   customer_id: number;
-  text_color: number
+  text_color: number;
 };
 
 export const submitCheckout = async (data: CheckoutPayload) => {

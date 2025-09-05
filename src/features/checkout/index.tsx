@@ -31,8 +31,8 @@ export default function CheckoutView() {
   const orderCount = useMemo(() => {
     return user?.personalize_items && typeof user.personalize_items === 'string'
       ? user.personalize_items
-        ?.split(',')
-        .filter((item) => item && +item.trim() != user?.personalize_draff).length
+          ?.split(',')
+          .filter((item) => item && +item.trim() != user?.personalize_draff).length
       : 0;
   }, [user]);
   const { store } = useParams();
@@ -111,8 +111,6 @@ export default function CheckoutView() {
 
     submit({ data, pinCode, status: 5 }, onStoreData);
   };
-
-  console.log({ productStore })
 
   return (
     <Container className='py-2.5 sm:py-5 md:py-7.5 lg:py-10'>
@@ -299,7 +297,7 @@ export default function CheckoutView() {
                         width={80}
                         height={80}
                         alt='Design Image'
-                        className={`h-20 w-20 border object-contain p-1 rounded ${productStore?.logoColor?.label?.toUpperCase() === 'WHITE' ? 'bg-black' : ''}`}
+                        className={`h-20 w-20 rounded border object-contain p-1 ${productStore?.logoColor?.label?.toUpperCase() === 'WHITE' ? 'bg-black' : ''}`}
                       />
                     </div>
 

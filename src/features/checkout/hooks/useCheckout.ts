@@ -83,14 +83,14 @@ export const useCheckout = () => {
           customer_id: user?.customer_id,
           product_id: productStore?.product_id,
           status: status,
-          text_color: +productStore?.logoColor?.key || 0
+          text_color: +productStore?.logoColor?.key || 0,
         };
         const res = await submitCheckout(payload);
         if (res?.errors) {
           throw new Error(
             res.errors[0]?.extensions?.debugMessage ||
-            res.errors[0]?.message ||
-            'An error occurred while submitting your order.',
+              res.errors[0]?.message ||
+              'An error occurred while submitting your order.',
           );
         }
 

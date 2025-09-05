@@ -35,7 +35,7 @@ interface CmsPageResponse {
 }
 
 export async function getTerms() {
-  const data = await apiGraphQLServer<CmsPageResponse>(CMS_PAGE_QUERY, {
+  const data = await apiGraphQLServer<CmsPageResponse>(CMS_PAGE_QUERY, 'en', {
     identifier: 'privacy-policy-cookie-restriction-mode',
   });
 

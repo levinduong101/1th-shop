@@ -22,8 +22,8 @@ type DialogProps<T extends FieldValues = ProductFormValues> = {
   error: string | undefined;
   imageUrl: string;
   color: string; // 'black' | 'white'
-  file: CustomFile | null
-  setValue: UseFormSetValue<ProductFormValues>
+  file: CustomFile | null;
+  setValue: UseFormSetValue<ProductFormValues>;
 };
 
 export default function DialogCustom({
@@ -34,7 +34,7 @@ export default function DialogCustom({
   imageUrl,
   color,
   file,
-  setValue
+  setValue,
 }: DialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
@@ -42,12 +42,13 @@ export default function DialogCustom({
 
   useEffect(() => {
     if (file?.isUpdate) {
-      let tmpFile = file;
+      const tmpFile = file;
       tmpFile.isUpdate = false;
       setProcessedImageUrl(URL.createObjectURL(tmpFile));
       setSelectedFile(tmpFile);
     }
-  }, [file?.isUpdate, setProcessedImageUrl, setSelectedFile])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file?.isUpdate, setProcessedImageUrl, setSelectedFile]);
 
   // Use the Web Worker hook
   const { processImage, isProcessing } = useImageWorker();
@@ -71,8 +72,8 @@ export default function DialogCustom({
       }
     };
 
-    process()
-  }, [color, processImage, open, selectedFile, setSelectedFile, setProcessedImageUrl]);
+    process();
+  }, [color, processImage, open, selectedFile, setSelectedFile, setProcessedImageUrl, setValue]);
 
   /** Animation when open */
   useEffect(() => {
@@ -163,38 +164,37 @@ export default function DialogCustom({
                     <div className='fixed inset-0 z-9999 grid place-items-center'>
                       <LoaderCircle className='text-red h-10 w-10 animate-spin' />
                     </div>
-                  ) : processedImageUrl ?
-                    (
-                      <div className='grid grid-rows-3 gap-2 w-full h-full'>
-                        {/* Show processed image if available, otherwise show original image */}
-                        <NextImage
-                          src={processedImageUrl || ''}
-                          alt='Uploaded File'
-                          width={100}
-                          height={100}
-                          className='mx-auto h-full w-full object-contain'
-                        />
-                        {color ? (
-                          <div className='relative row-span-2 w-full'>
-                            {color.toLowerCase() === 'black' ? (
-                              <NextImage
-                                src='/images/product-page/hoodie_front_black.png'
-                                alt='Uploaded File'
-                                layout='fill'
-                                className='mx-auto h-full object-contain'
-                              />
-                            ) : (
-                              <NextImage
-                                src='/images/product-page/hoodie_front_white.png'
-                                alt='Uploaded File'
-                                layout='fill'
-                                className='mx-auto h-full object-contain'
-                              />
-                            )}
-                          </div>
-                        ) : null}
-                      </div>
-                    ) : null}
+                  ) : processedImageUrl ? (
+                    <div className='grid h-full w-full grid-rows-3 gap-2'>
+                      {/* Show processed image if available, otherwise show original image */}
+                      <NextImage
+                        src={processedImageUrl || ''}
+                        alt='Uploaded File'
+                        width={100}
+                        height={100}
+                        className='mx-auto h-full w-full object-contain'
+                      />
+                      {color ? (
+                        <div className='relative row-span-2 w-full'>
+                          {color.toLowerCase() === 'black' ? (
+                            <NextImage
+                              src='/images/product-page/hoodie_front_black.png'
+                              alt='Uploaded File'
+                              layout='fill'
+                              className='mx-auto h-full object-contain'
+                            />
+                          ) : (
+                            <NextImage
+                              src='/images/product-page/hoodie_front_white.png'
+                              alt='Uploaded File'
+                              layout='fill'
+                              className='mx-auto h-full object-contain'
+                            />
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ) : null}
@@ -212,8 +212,7 @@ export default function DialogCustom({
               render={({ field: { name } }) => (
                 <Input
                   type='file'
-                  // accept='.jpg,.jpeg,.png,.tiff,.tif,.webp,.svg'
-                  accept=".png,.jpg,.jpeg,.bmp,.tiff,.svg"
+                  accept='.png,.jpg,.jpeg,.bmp,.tiff,.svg'
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
                       // onChange(e.target.files[0]);

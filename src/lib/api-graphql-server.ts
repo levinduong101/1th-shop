@@ -18,7 +18,7 @@ export async function apiGraphQLServer<T>(
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${ACCESS_TOKEN}`,
-        'store': locale
+        store: locale,
       },
       body: JSON.stringify({ query, variables }),
       next: { revalidate: options?.revalidate ?? 60 }, // default 60s

@@ -1,6 +1,6 @@
 'use client';
 import { Button } from '@/src/components/ui/Button';
-import { RulerIcon, UploadIcon, UploadSimpleIcon } from '@/src/components/ui/Icons';
+import { RulerIcon } from '@/src/components/ui/Icons';
 import clsx from 'clsx';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { ProductFormSchema, ProductFormValues } from '../lib/schema';
@@ -10,7 +10,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import DialogCustom from './Dialog';
 import { SIZE_CHART } from '../lib/data';
 import { getColorClass, getOptionKeyById } from '../lib/helper';
-import Image from 'next/image';
 import { useProductStore } from '@/src/store/productStore';
 import { useParams, useRouter } from 'next/navigation';
 import { Product } from '../service/get.product';
@@ -18,7 +17,12 @@ import { useSelectedColor } from '@/src/store/selectedColorStore';
 import { useAuthStore } from '@/src/store/authStore';
 import { useAppyDraft } from '../hooks/useApplyDraft';
 import { LoaderCircle } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/src/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/src/components/ui/tooltip';
 import UploadButton from './UploadButton';
 
 type OptionType = 'CustomizableDropDownOption' | 'CustomizableFieldOption';
@@ -58,7 +62,7 @@ export default function Form({ product }: { product: Product | null }) {
     colorMapImageByLabel,
     colorMapById,
     sizeMapById,
-    logoColorMapById
+    logoColorMapById,
   }: {
     OPTIONS: Option[];
     colorMapImageByLabel: Map<string, string>;
@@ -116,7 +120,7 @@ export default function Form({ product }: { product: Product | null }) {
       colorMapImageByLabel,
       colorMapById,
       sizeMapById,
-      logoColorMapById
+      logoColorMapById,
     };
   }, [product]);
 
@@ -149,16 +153,18 @@ export default function Form({ product }: { product: Product | null }) {
     }
 
     reset(
-      formStore ? {
-        ...formStore,
-        file: fileInStore as unknown as File,
-      } : {
-        selectedImage: initImage || '',
-        size: initSize || { key: '', label: '' },
-        color: initColor || { key: '', label: '' },
-        logoColor: initLogoColor || { key: '', label: '' },
-        file: null as unknown as File,
-      },
+      formStore
+        ? {
+            ...formStore,
+            file: fileInStore as unknown as File,
+          }
+        : {
+            selectedImage: initImage || '',
+            size: initSize || { key: '', label: '' },
+            color: initColor || { key: '', label: '' },
+            logoColor: initLogoColor || { key: '', label: '' },
+            file: null as unknown as File,
+          },
     );
   }, [reset, OPTIONS, colorMapImageByLabel, formStore]);
 
@@ -190,7 +196,7 @@ export default function Form({ product }: { product: Product | null }) {
       orderId: user?.personalize_draff || 0,
       colorMapById,
       sizeMapById,
-      logoColorMapById
+      logoColorMapById,
     });
   };
 
@@ -213,7 +219,7 @@ export default function Form({ product }: { product: Product | null }) {
         );
 
       case 'CustomizableDropDownOption':
-        const id = option.id
+        const id = option.id;
         const optionKey = getOptionKeyById(id);
         if (optionKey === 'size') {
           return (
@@ -310,7 +316,8 @@ export default function Form({ product }: { product: Product | null }) {
                     <div className='flex flex-wrap items-center gap-3'>
                       {option?.values &&
                         option.values.map((color, index) => {
-                          const isSameBlackColor = selectedLogoColor?.label === 'BLACK' && color?.label === 'BLACK'
+                          const isSameBlackColor =
+                            selectedLogoColor?.label === 'BLACK' && color?.label === 'BLACK';
 
                           return (
                             <Tooltip key={index}>
@@ -365,7 +372,8 @@ export default function Form({ product }: { product: Product | null }) {
                     <div className='flex flex-wrap items-center gap-3'>
                       {option?.values &&
                         option.values.map((color, index) => {
-                          const isSameBlackColor = selectedColor?.label === 'BLACK' && color?.label === 'BLACK'
+                          const isSameBlackColor =
+                            selectedColor?.label === 'BLACK' && color?.label === 'BLACK';
 
                           return (
                             <Tooltip key={index}>

@@ -47,7 +47,7 @@ export const useAppyDraft = () => {
       orderId,
       colorMapById,
       sizeMapById,
-      logoColorMapById
+      logoColorMapById,
     }: {
       orderId: string | number;
       colorMapById: Map<string, string>;
@@ -74,6 +74,7 @@ export const useAppyDraft = () => {
           try {
             logoFile = await urlToFile(data.logo, 'logo');
           } catch (error) {
+            // eslint-disable-next-line no-console
             console.warn('Failed to convert logo URL to file:', error);
             logoFile = data.logo;
           }
@@ -108,10 +109,9 @@ export const useAppyDraft = () => {
         loadingRef.current = false;
         setIsLoading(false);
       }
-    }
+    },
   };
 };
-
 
 // Helper function to convert image URL to File object
 async function urlToFile(url: string, filename: string): Promise<File> {
@@ -120,15 +120,14 @@ async function urlToFile(url: string, filename: string): Promise<File> {
   const response = await fetch(proxyUrl, {
     method: 'GET',
     headers: {
-      'Accept': 'image/*',
+      Accept: 'image/*',
     },
   });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(
-      `Failed to fetch image: ${response.status} ${response.statusText}. ${errorData.error || ''
-      }`
+      `Failed to fetch image: ${response.status} ${response.statusText}. ${errorData.error || ''}`,
     );
   }
 
@@ -146,7 +145,7 @@ async function urlToFile(url: string, filename: string): Promise<File> {
       'image/png': '.png',
       'image/gif': '.gif',
       'image/webp': '.webp',
-      'image/svg+xml': '.svg'
+      'image/svg+xml': '.svg',
     };
     extension = typeMap[contentType] || '.png';
   } else {

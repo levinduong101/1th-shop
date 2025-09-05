@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       product_id,
       status,
       customer_id,
-      text_color
+      text_color,
     }: CheckoutPayload = body;
 
     // Build GraphQL mutation dynamically
